@@ -18,7 +18,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="MessageListViewItemTemplate">
-            <Border Margin="4,4,4,4" Background="#FFA3F3F3" >
+            <Border Margin="4,4,4,4" Background="#FFA3F3F3" CornerRadius="5,5,5,5" >
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -45,6 +45,8 @@
                 <Button Command="{Binding SendCommand}" Margin="2,2,2,2" Width="85">Send</Button>
             </StackPanel>
         </Grid>
-        <ListView ItemTemplate="{DynamicResource MessageListViewItemTemplate}" ItemsSource="{Binding Messages}"  DockPanel.Dock="Right"></ListView>
+        <ListView ItemTemplate="{DynamicResource MessageListViewItemTemplate}" 
+                  ItemsSource="{Binding Messages}"  
+                  DockPanel.Dock="Right"/>
     </DockPanel>
 </mah:MetroWindow>

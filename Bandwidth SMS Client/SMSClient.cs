@@ -81,5 +81,17 @@ namespace Bandwidth_SMS_Client
                         };
             return query.AsEnumerable();
         }
+
+        public void SendMessage(string recipient, string body)
+        {
+            var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
+            request.AddParameter("body", body);
+            request.AddParameter("to", recipient);
+            var response = RestClient.Execute<MessageItem>(request);
+            if(response.StatusCode!=HttpStatusCode.Created)
+            {
+                throw new HttpRequestException();
+            }
+        }
     }
 }

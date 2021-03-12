@@ -47,7 +47,8 @@ namespace Bandwidth_SMS_Client.ViewModels
 
         private void DoSend()
         {
-            throw new NotImplementedException();
+            _smsClient.SendMessage(SelectedThread.Recipient, Message);
+            Message = "";
         }
 
         public MainWindowViewModel(IRegionManager regionManager, IDialogService dialogService, SMSClient smsClient)
