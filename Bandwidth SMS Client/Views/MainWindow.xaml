@@ -1,0 +1,50 @@
+﻿<mah:MetroWindow x:Class="Bandwidth_SMS_Client.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:prism="http://prismlibrary.com/"
+        xmlns:local="clr-namespace:Bandwidth_SMS_Client"
+        xmlns:models="clr-namespace:Bandwidth_SMS_Client.Models"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        mc:Ignorable="d"
+        Title="Trifecta SMS" Height="600" Width="1000" WindowStartupLocation="CenterScreen">
+    <mah:MetroWindow.Resources>
+        <DataTemplate x:Key="MessageThreadItemTemplate">
+            <Grid>
+                <TextBlock Text="{Binding Recipient}"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MessageListViewItemTemplate">
+            <Border Margin="4,4,4,4" Background="#FFA3F3F3" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding MFrom}"/>
+                    <TextBlock Text="{Binding Body}" Grid.Row="1"/>
+                </Grid>
+               
+            </Border>
+        </DataTemplate>
+    </mah:MetroWindow.Resources>
+    <DockPanel prism:RegionManager.RegionContext="{Binding Messages}">
+        <ListView ItemTemplate="{DynamicResource MessageThreadItemTemplate}" SelectedItem="{Binding SelectedThread, Mode=TwoWay}" ItemsSource="{Binding MessageThreads}"/>
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding Message}" MinLines="4" Margin="2,2,2,2"/>
+            <StackPanel Orientation="Vertical" Grid.Column="1">
+                <Button Command="{Binding SendCommand}" Margin="2,2,2,2" Width="85">Send</Button>
+            </StackPanel>
+        </Grid>
+        <ListView ItemTemplate="{DynamicResource MessageListViewItemTemplate}" ItemsSource="{Binding Messages}"  DockPanel.Dock="Right"></ListView>
+    </DockPanel>
+</mah:MetroWindow>
