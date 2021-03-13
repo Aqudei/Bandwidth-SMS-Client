@@ -21,6 +21,7 @@ namespace Bandwidth_SMS_Client
         {
             containerRegistry.RegisterDialogWindow<MyMetroWindow>();
             containerRegistry.RegisterDialog<Login, LoginViewModel>();
+            containerRegistry.RegisterDialog<SMSComposer, SMSComposerViewModel>();
             containerRegistry.RegisterInstance(new SMSClient());
         }
 
