@@ -69,7 +69,7 @@ namespace Bandwidth_SMS_Client.ViewModels
         {
         }
 
-        public string Title { get; }
+        public string Title { get; } = "Login";
         public event Action<IDialogResult> RequestClose;
 
 
