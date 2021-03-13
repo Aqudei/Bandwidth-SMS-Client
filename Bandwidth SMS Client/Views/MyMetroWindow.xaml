@@ -6,7 +6,12 @@
         xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
-        Title="{Binding Title}" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen">
+        Title="{Binding Title}" 
+        SizeToContent="WidthAndHeight" 
+        WindowStartupLocation="CenterScreen" 
+        ShowCloseButton="False" 
+        ShowMinButton="False"
+        ShowMaxRestoreButton="False">
     <Grid>
         
     </Grid>

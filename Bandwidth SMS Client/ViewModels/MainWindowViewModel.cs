@@ -21,8 +21,17 @@ namespace Bandwidth_SMS_Client.ViewModels
         private string _message;
         private DelegateCommand _sendCommand;
         private MessageThread _selectedThread;
+        private DelegateCommand _newMessageCommand;
         public ObservableCollection<MessageThread> MessageThreads { get; set; } = new ObservableCollection<MessageThread>();
         public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
+
+        public DelegateCommand NewMessageCommand => _newMessageCommand ??= new DelegateCommand(DoNewMessage);
+
+        private void DoNewMessage()
+        {
+            _dialogService.ShowDialog("SMSComposer");
+        }
+
 
         public MessageThread SelectedThread
         {
