@@ -21,7 +21,12 @@
             </Grid.ColumnDefinitions>
 
             <TextBox HorizontalAlignment="Stretch" Text="{Binding Recipient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Margin="2,2,2,2"/>
-            <Button Command="{Binding SendCommand}" Grid.Column="1" Margin="2,2,2,2">Send</Button>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Command="{Binding SendCommand}"  Margin="2">Send</Button>
+                <Button Command="{Binding CloseCommand}" Margin="2">Close</Button>
+            </StackPanel>
+
         </Grid>
         <TextBox Text="{Binding Message, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Margin="2,2,2,2"/>
 

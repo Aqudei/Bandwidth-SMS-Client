@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
+             xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:converters="clr-namespace:Bandwidth_SMS_Client.Converters" x:Class="Bandwidth_SMS_Client.Views.MessagItemView"
              mc:Ignorable="d">
 
@@ -12,23 +13,50 @@
         <converters:MessageTypeToBrushConverter x:Key="MessageTypeToBrushConverter"/>
     </UserControl.Resources>
 
-    <Border Background="{Binding MessageType, Converter={StaticResource MessageTypeToBrushConverter}}"
-            HorizontalAlignment="{Binding MessageType, Converter={StaticResource MessageTypeToAlignmentConverter}}"
+    <Border Background="{Binding Message_Type, Converter={StaticResource MessageTypeToBrushConverter}}"
+            HorizontalAlignment="{Binding Message_Type, Converter={StaticResource MessageTypeToAlignmentConverter}}"
             Padding="15"
             CornerRadius="8"
-            Margin="2,2,2,2" Width="400">
-        <Grid>
+            Margin="8" 
+            Width="600">
+        <Grid >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <TextBlock FontSize="14" d:Text="From: +639213466856" ><Run Text="From: "/><Run Text=" "/><Run Text="{Binding MFrom}"/></TextBlock>
+            <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left"><Run Text="From: "/><Run Text=" "/><Run Text="{Binding MFrom}"/></TextBlock>
+            <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding Message_Date}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+<!--Actions-->
+            <StackPanel Grid.Column="2" 
+                        Grid.Row="0" 
+                        Orientation="Horizontal" 
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right" 
+                        Margin="2">
+
+                <Button HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center"
+                        CommandParameter="{Binding}"
+                        Command="{Binding DataContext.DeleteMessageCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}">
+                    <ico:BootstrapIcons Kind="Trash"></ico:BootstrapIcons>
+                </Button>
+            </StackPanel>
+
+            <!--End Action-->
             <TextBlock TextWrapping="Wrap" 
-                       FontSize="14"
+                       Grid.Column="0"
+                       FontSize="16"
                        Text="{Binding Body}" 
                        d:Text="This is the body of the message" 
-                       Grid.Row="1"/>
+                       Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Center"/>
         </Grid>
     </Border>
 </UserControl>
