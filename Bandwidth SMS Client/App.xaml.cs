@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Bandwidth_SMS_Client.ViewModels;
 using Bandwidth_SMS_Client.Views;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Unity;
 
@@ -22,7 +23,8 @@ namespace Bandwidth_SMS_Client
             containerRegistry.RegisterDialogWindow<MyMetroWindow>();
             containerRegistry.RegisterDialog<Login, LoginViewModel>();
             containerRegistry.RegisterDialog<SMSComposer, SMSComposerViewModel>();
-            containerRegistry.RegisterInstance(new SMSClient());
+            containerRegistry.RegisterSingleton<IEventAggregator, EventAggregator>();
+            containerRegistry.RegisterSingleton<SMSClient>();
         }
 
         protected override Window CreateShell()
