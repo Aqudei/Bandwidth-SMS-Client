@@ -29,6 +29,7 @@ namespace Bandwidth_SMS_Client.ViewModels
         private MessageThread _selectedThread;
         private DelegateCommand _newMessageCommand;
         private DelegateCommand<MessageItem> _deleteMessageCommand;
+        private Dispatcher _dispatcher;
         public ObservableCollection<MessageThread> MessageThreads { get; set; } = new ObservableCollection<MessageThread>();
         public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
 
@@ -74,6 +75,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             _dialogService = dialogService;
             _smsClient = smsClient;
             _eventAggregator = eventAggregator;
+            _dispatcher = Application.Current.Dispatcher;
 
             _dialogService.ShowDialog("Login", result =>
             {
@@ -94,8 +96,23 @@ namespace Bandwidth_SMS_Client.ViewModels
                 //ignored
             }
 
-            _eventAggregator.GetEvent<MessageEvent>().Subscribe(MessageEventHandler, ThreadOption.UIThread);
             PropertyChanged += MainWindowViewModel_PropertyChanged;
+            _smsClient.MessageEvent += _smsClient_MessageEvent;
+        }
+
+        private void _smsClient_MessageEvent(object sender, MessageEventPayload e)
+        {
+            if (e.EventType == MessageEventPayload.MessageEventType.Created)
+            {
+                _dispatcher.Invoke(() =>
+                {
+                    var messageItem = Messages.FirstOrDefault(m => m.Message_Bwid == e.MessageItem.Message_Bwid);
+                    if (messageItem != null)
+                        Messages.Remove(messageItem);
+
+                    Messages.Add(e.MessageItem);
+                });
+            }
         }
 
         public DelegateCommand<MessageItem> DeleteMessageCommand => _deleteMessageCommand ??= new DelegateCommand<MessageItem>(DoDeleteMessage);
@@ -113,20 +130,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             }
         }
 
-        private void MessageEventHandler(MessageEventPayload e)
-        {
 
-            if (e.EventType == MessageEventPayload.MessageEventType.Created)
-            {
-                if (Messages.Any(m => m.Message_Bwid == e.MessageItem.Message_Bwid))
-                {
-                    var messageItem = Messages.First(m => m.Message_Bwid == e.MessageItem.Message_Bwid);
-                    Messages.Remove(messageItem);
-                }
-
-                Messages.Add(e.MessageItem);
-            }
-        }
 
         //private void _smsClient_MessageUpdate(object sender, MessageEvent e)
         //{

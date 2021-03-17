@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -41,16 +42,14 @@ namespace Bandwidth_SMS_Client
 
     public class SMSClient
     {
-        private readonly IEventAggregator _eventAggregator;
-
         private string _token;
-        //public RestClient RestClient = new RestClient("http://127.0.0.1:8000") { UnsafeAuthenticatedConnectionSharing = true };
+        //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
         public RestClient RestClient = new RestClient("https://smstrifecta.ga");
         private readonly BackgroundWorker _worker;
+        public event EventHandler<MessageEventPayload> MessageEvent;
 
-        public SMSClient(IEventAggregator eventAggregator)
+        public SMSClient()
         {
-            _eventAggregator = eventAggregator;
             _worker = new BackgroundWorker();
             _worker.DoWork += _worker_DoWork;
             _worker.WorkerReportsProgress = true;
@@ -59,14 +58,25 @@ namespace Bandwidth_SMS_Client
 
         private void _worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            var since = DateTime.UtcNow;
             while (true)
             {
-                Thread.Sleep(1000);
-                var request = new RestRequest("/sms/pushes", Method.GET, DataFormat.Json);
+                Thread.Sleep(3000);
+                var request = new RestRequest($"/sms/pushes/{since.ToString("s", CultureInfo.InvariantCulture)}", Method.GET, DataFormat.Json);
                 var response = RestClient.Execute<IEnumerable<Push>>(request);
                 if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    since = DateTime.UtcNow;
                     continue;
+                }
 
+                if (!response.Data.Any())
+                {
+                    since = DateTime.UtcNow;
+                    continue;
+                }
+
+                since = response.Data.Max(d => d.DateCreated).ToUniversalTime() + TimeSpan.FromSeconds(1);
                 foreach (var push in response.Data)
                 {
                     if (push.Name == "message-created")
@@ -79,7 +89,7 @@ namespace Bandwidth_SMS_Client
                             MessageItem = messageItem
                         };
 
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(messageEventPayload);
+                        MessageEvent?.Invoke(this, messageEventPayload);
                     }
                 }
             }
