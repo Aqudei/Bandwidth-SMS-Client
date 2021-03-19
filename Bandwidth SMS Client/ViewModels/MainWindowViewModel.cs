@@ -86,10 +86,8 @@ namespace Bandwidth_SMS_Client.ViewModels
                 }
             });
 
-
             try
             {
-
                 Conversations.AddRange(_smsClient.ListConversations());
             }
             catch
@@ -106,43 +104,38 @@ namespace Bandwidth_SMS_Client.ViewModels
         {
             if (e.EventType == ConversationEventPayload.ConversationEventType.Created)
             {
-                Conversations.Add(e.ConversationItem);
+                _dispatcher.Invoke(() => Conversations.Add(e.ConversationItem));
             }
         }
 
         private void _smsClient_MessageEvent(object sender, MessageEventPayload e)
         {
-            if (e.EventType == MessageEventPayload.MessageEventType.Created)
+            switch (e.EventType)
             {
-                _dispatcher.Invoke(() =>
-                {
-                    var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
-                    var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
-
-                    if (conversation != null && SelectedConversation.Equals(conversation))
+                case MessageEventPayload.MessageEventType.Created:
+                    _dispatcher.Invoke(() =>
                     {
-                        Messages.Add(e.MessageItem);
-                    }
-                    //var messageItem = .MessageItems.FirstOrDefault(m => m.Message_Bwid == e.MessageItem.Message_Bwid);
-                    //if (messageItem != null)
-                    //    Messages.Remove(messageItem);
+                        var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
+                        var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                    //Messages.Add(e.MessageItem);
-                });
-            }
-
-            if (e.EventType == MessageEventPayload.MessageEventType.Deleted)
-            {
-                _dispatcher.Invoke(() =>
-                {
-                    var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
-                    var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
-
-                    if (conversation != null && SelectedConversation.Equals(conversation))
+                        if (conversation != null && SelectedConversation.Equals(conversation))
+                        {
+                            Messages.Add(e.MessageItem);
+                        }
+                    });
+                    break;
+                case MessageEventPayload.MessageEventType.Deleted:
+                    _dispatcher.Invoke(() =>
                     {
-                        Messages.Remove(e.MessageItem);
-                    }
-                });
+                        var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
+                        var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+
+                        if (conversation != null && SelectedConversation.Equals(conversation))
+                        {
+                            Messages.Remove(e.MessageItem);
+                        }
+                    });
+                    break;
             }
         }
 

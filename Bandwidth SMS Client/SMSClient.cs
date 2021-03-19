@@ -56,76 +56,98 @@ namespace Bandwidth_SMS_Client
             _worker = new BackgroundWorker();
             _worker.DoWork += _worker_DoWork;
             _worker.WorkerReportsProgress = true;
-            _worker.RunWorkerAsync();
+        }
+
+        private DateTime ReadLastPull()
+        {
+            try
+            {
+                return Properties.Settings.Default.LastPull == new DateTime(1753, 1, 1) ? DateTime.UtcNow : Properties.Settings.Default.LastPull;
+            }
+            catch
+            {
+                return DateTime.UtcNow;
+            }
         }
 
         private void _worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            var since = DateTime.UtcNow;
+            var since = ReadLastPull();
+            SaveLastPull(since);
             while (true)
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(4000);
                 var request = new RestRequest($"/sms/pushes/{since.ToString("s", CultureInfo.InvariantCulture)}", Method.GET, DataFormat.Json);
                 var response = RestClient.Execute<IEnumerable<Push>>(request);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     since = DateTime.UtcNow;
+                    SaveLastPull(since);
                     continue;
                 }
 
                 if (!response.Data.Any())
                 {
                     since = DateTime.UtcNow;
+                    SaveLastPull(since);
                     continue;
                 }
 
                 since = response.Data.Max(d => d.DateCreated).ToUniversalTime() + TimeSpan.FromSeconds(1);
+                SaveLastPull(since);
+
                 foreach (var push in response.Data)
                 {
                     switch (push.Name)
                     {
                         case "message-created":
-                        {
-                            var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
-
-                            var messageEventPayload = new MessageEventPayload
                             {
-                                EventType = MessageEventPayload.MessageEventType.Created,
-                                MessageItem = messageItem
-                            };
+                                var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
 
-                            MessageEvent?.Invoke(this, messageEventPayload);
-                            break;
-                        }
+                                var messageEventPayload = new MessageEventPayload
+                                {
+                                    EventType = MessageEventPayload.MessageEventType.Created,
+                                    MessageItem = messageItem
+                                };
+
+                                MessageEvent?.Invoke(this, messageEventPayload);
+                                break;
+                            }
                         case "message-deleted":
-                        {
-                            var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
-
-                            var messageEventPayload = new MessageEventPayload
                             {
-                                EventType = MessageEventPayload.MessageEventType.Deleted,
-                                MessageItem = messageItem
-                            };
+                                var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
 
-                            MessageEvent?.Invoke(this, messageEventPayload);
-                            break;
-                        }
+                                var messageEventPayload = new MessageEventPayload
+                                {
+                                    EventType = MessageEventPayload.MessageEventType.Deleted,
+                                    MessageItem = messageItem
+                                };
+
+                                MessageEvent?.Invoke(this, messageEventPayload);
+                                break;
+                            }
                         case "conversation-created":
-                        {
-                            var conversation = JsonConvert.DeserializeObject<Conversation>(push.Body);
-
-                            var conversationEventPayload = new ConversationEventPayload
                             {
-                                EventType = ConversationEventPayload.ConversationEventType.Created,
-                                ConversationItem = conversation
-                            };
+                                var conversation = JsonConvert.DeserializeObject<Conversation>(push.Body);
 
-                            ConversationEvent?.Invoke(this, conversationEventPayload);
-                            break;
-                        }
+                                var conversationEventPayload = new ConversationEventPayload
+                                {
+                                    EventType = ConversationEventPayload.ConversationEventType.Created,
+                                    ConversationItem = conversation
+                                };
+
+                                ConversationEvent?.Invoke(this, conversationEventPayload);
+                                break;
+                            }
                     }
                 }
             }
+        }
+
+        private static void SaveLastPull(DateTime since)
+        {
+            Properties.Settings.Default.LastPull = since;
+            Properties.Settings.Default.Save();
         }
 
         public void Login(string username, string password)
@@ -141,6 +163,7 @@ namespace Bandwidth_SMS_Client
 
             _token = response.Data.Token;
             RestClient.Authenticator = new MyTokenAuthenticator(_token);
+            _worker.RunWorkerAsync();
         }
 
         private void AttachTokenAuth(RestRequest request)
