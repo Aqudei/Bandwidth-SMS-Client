@@ -21,11 +21,11 @@
             </Grid.RowDefinitions>
 
             <Button Margin="2" Command="{Binding NewMessageCommand}">New Message</Button>
-            <ListView SelectedItem="{Binding SelectedThread, Mode=TwoWay}"
-                      ItemsSource="{Binding MessageThreads}" Grid.Row="1">
+            <ListView SelectedItem="{Binding SelectedConversation, Mode=TwoWay}"
+                      ItemsSource="{Binding Conversations}" Grid.Row="1">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <views:MessageThreadView/>
+                        <views:ConversationView/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

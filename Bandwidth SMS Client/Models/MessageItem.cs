@@ -5,7 +5,7 @@ using Prism.Mvvm;
 
 namespace Bandwidth_SMS_Client.Models
 {
-    public class MessageItem : BindableBase
+    public class MessageItem : BindableBase, IEquatable<MessageItem>
     {
         public int Id { get; set; }
         private bool _isNew = false;
@@ -22,6 +22,26 @@ namespace Bandwidth_SMS_Client.Models
         {
             get => _isNew;
             set => SetProperty(ref _isNew, value);
+        }
+
+        public bool Equals(MessageItem other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Id == other.Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((MessageItem)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id;
         }
     }
 }
