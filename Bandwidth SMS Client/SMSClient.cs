@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -8,6 +10,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
@@ -41,51 +44,111 @@ namespace Bandwidth_SMS_Client
 
     public class SMSClient
     {
-        private readonly IEventAggregator _eventAggregator;
-
         private string _token;
-        //public RestClient RestClient = new RestClient("http://127.0.0.1:8000") { UnsafeAuthenticatedConnectionSharing = true };
+        //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
         public RestClient RestClient = new RestClient("https://smstrifecta.ga");
         private readonly BackgroundWorker _worker;
+        public event EventHandler<MessageEventPayload> MessageEvent;
+        public event EventHandler<ConversationEventPayload> ConversationEvent;
 
-        public SMSClient(IEventAggregator eventAggregator)
+        public SMSClient()
         {
-            _eventAggregator = eventAggregator;
             _worker = new BackgroundWorker();
             _worker.DoWork += _worker_DoWork;
             _worker.WorkerReportsProgress = true;
-            _worker.RunWorkerAsync();
+        }
+
+        private DateTime ReadLastPull()
+        {
+            try
+            {
+                return Properties.Settings.Default.LastPull == new DateTime(1753, 1, 1) ? DateTime.UtcNow : Properties.Settings.Default.LastPull;
+            }
+            catch
+            {
+                return DateTime.UtcNow;
+            }
         }
 
         private void _worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            var since = ReadLastPull();
+            SaveLastPull(since);
             while (true)
             {
-                Thread.Sleep(1000);
-                var request = new RestRequest("/sms/pushes", Method.GET, DataFormat.Json);
+                Thread.Sleep(4000);
+                var request = new RestRequest($"/sms/pushes/{since.ToString("s", CultureInfo.InvariantCulture)}", Method.GET, DataFormat.Json);
                 var response = RestClient.Execute<IEnumerable<Push>>(request);
                 if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    since = DateTime.UtcNow;
+                    SaveLastPull(since);
                     continue;
+                }
+
+                if (!response.Data.Any())
+                {
+                    since = DateTime.UtcNow;
+                    SaveLastPull(since);
+                    continue;
+                }
+
+                since = response.Data.Max(d => d.DateCreated).ToUniversalTime() + TimeSpan.FromSeconds(1);
+                SaveLastPull(since);
 
                 foreach (var push in response.Data)
                 {
-                    if (push.Name == "message-created")
+                    switch (push.Name)
                     {
-                        var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
+                        case "message-created":
+                            {
+                                var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
 
-                        var messageEventPayload = new MessageEventPayload
-                        {
-                            EventType = MessageEventPayload.MessageEventType.Created,
-                            MessageItem = messageItem
-                        };
+                                var messageEventPayload = new MessageEventPayload
+                                {
+                                    EventType = MessageEventPayload.MessageEventType.Created,
+                                    MessageItem = messageItem
+                                };
 
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(messageEventPayload);
+                                MessageEvent?.Invoke(this, messageEventPayload);
+                                break;
+                            }
+                        case "message-deleted":
+                            {
+                                var messageItem = JsonConvert.DeserializeObject<MessageItem>(push.Body);
+
+                                var messageEventPayload = new MessageEventPayload
+                                {
+                                    EventType = MessageEventPayload.MessageEventType.Deleted,
+                                    MessageItem = messageItem
+                                };
+
+                                MessageEvent?.Invoke(this, messageEventPayload);
+                                break;
+                            }
+                        case "conversation-created":
+                            {
+                                var conversation = JsonConvert.DeserializeObject<Conversation>(push.Body);
+
+                                var conversationEventPayload = new ConversationEventPayload
+                                {
+                                    EventType = ConversationEventPayload.ConversationEventType.Created,
+                                    ConversationItem = conversation
+                                };
+
+                                ConversationEvent?.Invoke(this, conversationEventPayload);
+                                break;
+                            }
                     }
                 }
             }
         }
 
-        public event EventHandler<MessageEvent> MessageUpdate;
+        private static void SaveLastPull(DateTime since)
+        {
+            Properties.Settings.Default.LastPull = since;
+            Properties.Settings.Default.Save();
+        }
 
         public void Login(string username, string password)
         {
@@ -100,6 +163,7 @@ namespace Bandwidth_SMS_Client
 
             _token = response.Data.Token;
             RestClient.Authenticator = new MyTokenAuthenticator(_token);
+            _worker.RunWorkerAsync();
         }
 
         private void AttachTokenAuth(RestRequest request)
@@ -107,7 +171,7 @@ namespace Bandwidth_SMS_Client
             request.AddHeader("Authorization", $"Token {_token}");
         }
 
-        public IEnumerable<MessageThread> GetThreads()
+        public IEnumerable<MessageThread> ListThreads()
         {
             var request = new RestRequest("/sms/messages", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<MessageItem>>(request);
@@ -135,6 +199,7 @@ namespace Bandwidth_SMS_Client
             var response = RestClient.Execute<MessageItem>(request);
             if (response.StatusCode != HttpStatusCode.Created)
             {
+                Debug.WriteLine($"{response.ErrorMessage} | {response.ErrorException?.Message}");
                 throw new HttpRequestException();
             }
         }
@@ -148,6 +213,35 @@ namespace Bandwidth_SMS_Client
             {
                 throw new HttpRequestException();
             }
+        }
+
+        public IEnumerable<Conversation> ListConversations()
+        {
+            var request = new RestRequest($"/sms/conversations", Method.GET, DataFormat.Json);
+            var response = RestClient.Execute<IEnumerable<Conversation>>(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
+            }
+
+            return response.Data;
+        }
+
+        public Task<IEnumerable<MessageItem>> ListMessagesAsync(int conversationId)
+        {
+            return Task.Run(() => ListMessages(conversationId));
+        }
+
+        public IEnumerable<MessageItem> ListMessages(int conversationId)
+        {
+            var request = new RestRequest($"/sms/messages/{conversationId}", Method.GET, DataFormat.Json);
+            var response = RestClient.Execute<IEnumerable<MessageItem>>(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
+            }
+
+            return response.Data;
         }
     }
 

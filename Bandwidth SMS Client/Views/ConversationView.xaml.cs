@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace Bandwidth_SMS_Client.Views
 {
     /// <summary>
-    /// Interaction logic for MessageThreadView.xaml
+    /// Interaction logic for ConversationView.xaml
     /// </summary>
-    public partial class MessageThreadView : UserControl
+    public partial class ConversationView : UserControl
     {
-        public MessageThreadView()
+        public ConversationView()
         {
             InitializeComponent();
         }

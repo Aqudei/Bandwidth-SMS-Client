@@ -29,7 +29,16 @@ namespace Bandwidth_SMS_Client.ViewModels
         private MessageThread _selectedThread;
         private DelegateCommand _newMessageCommand;
         private DelegateCommand<MessageItem> _deleteMessageCommand;
-        public ObservableCollection<MessageThread> MessageThreads { get; set; } = new ObservableCollection<MessageThread>();
+        private Dispatcher _dispatcher;
+        private Conversation _selectedConversation;
+        public ObservableCollection<Conversation> Conversations { get; set; } = new ObservableCollection<Conversation>();
+
+        public Conversation SelectedConversation
+        {
+            get => _selectedConversation;
+            set => SetProperty(ref _selectedConversation, value);
+        }
+
         public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
 
         public DelegateCommand NewMessageCommand => _newMessageCommand ??= new DelegateCommand(DoNewMessage);
@@ -37,13 +46,6 @@ namespace Bandwidth_SMS_Client.ViewModels
         private void DoNewMessage()
         {
             _dialogService.ShowDialog("SMSComposer");
-        }
-
-
-        public MessageThread SelectedThread
-        {
-            get => _selectedThread;
-            set => SetProperty(ref _selectedThread, value);
         }
 
         public string Message
@@ -63,7 +65,7 @@ namespace Bandwidth_SMS_Client.ViewModels
 
         private void DoSend()
         {
-            _smsClient.SendMessage(SelectedThread.Recipient, Message);
+            _smsClient.SendMessage(SelectedConversation.PhoneNumber, Message);
             Message = "";
         }
 
@@ -74,6 +76,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             _dialogService = dialogService;
             _smsClient = smsClient;
             _eventAggregator = eventAggregator;
+            _dispatcher = Application.Current.Dispatcher;
 
             _dialogService.ShowDialog("Login", result =>
             {
@@ -83,19 +86,57 @@ namespace Bandwidth_SMS_Client.ViewModels
                 }
             });
 
-
             try
             {
-
-                MessageThreads.AddRange(_smsClient.GetThreads());
+                Conversations.AddRange(_smsClient.ListConversations());
             }
             catch
             {
                 //ignored
             }
 
-            _eventAggregator.GetEvent<MessageEvent>().Subscribe(MessageEventHandler, ThreadOption.UIThread);
             PropertyChanged += MainWindowViewModel_PropertyChanged;
+            _smsClient.MessageEvent += _smsClient_MessageEvent;
+            _smsClient.ConversationEvent += _smsClient_ConversationEvent;
+        }
+
+        private void _smsClient_ConversationEvent(object sender, ConversationEventPayload e)
+        {
+            if (e.EventType == ConversationEventPayload.ConversationEventType.Created)
+            {
+                _dispatcher.Invoke(() => Conversations.Add(e.ConversationItem));
+            }
+        }
+
+        private void _smsClient_MessageEvent(object sender, MessageEventPayload e)
+        {
+            switch (e.EventType)
+            {
+                case MessageEventPayload.MessageEventType.Created:
+                    _dispatcher.Invoke(() =>
+                    {
+                        var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
+                        var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+
+                        if (conversation != null && SelectedConversation.Equals(conversation))
+                        {
+                            Messages.Add(e.MessageItem);
+                        }
+                    });
+                    break;
+                case MessageEventPayload.MessageEventType.Deleted:
+                    _dispatcher.Invoke(() =>
+                    {
+                        var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
+                        var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+
+                        if (conversation != null && SelectedConversation.Equals(conversation))
+                        {
+                            Messages.Remove(e.MessageItem);
+                        }
+                    });
+                    break;
+            }
         }
 
         public DelegateCommand<MessageItem> DeleteMessageCommand => _deleteMessageCommand ??= new DelegateCommand<MessageItem>(DoDeleteMessage);
@@ -113,41 +154,22 @@ namespace Bandwidth_SMS_Client.ViewModels
             }
         }
 
-        private void MessageEventHandler(MessageEventPayload e)
-        {
-
-            if (e.EventType == MessageEventPayload.MessageEventType.Created)
-            {
-                if (Messages.Any(m => m.Message_Bwid == e.MessageItem.Message_Bwid))
-                {
-                    var messageItem = Messages.First(m => m.Message_Bwid == e.MessageItem.Message_Bwid);
-                    Messages.Remove(messageItem);
-                }
-
-                Messages.Add(e.MessageItem);
-            }
-        }
-
-        //private void _smsClient_MessageUpdate(object sender, MessageEvent e)
-        //{
-        //    if (e.EventType == MessageEvent.MessageEventType.Created)
-        //    {
-        //        var messageItem = Messages.First(m => m.Message_Bwid == e.MessageItem.Message_Bwid);
-        //        if (messageItem != null)
-        //        {
-        //            Messages.Remove(messageItem);
-        //        }
-
-        //        Messages.Add(e.MessageItem);
-        //    }
-        //}
 
         private void MainWindowViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(SelectedThread))
+            if (e.PropertyName == nameof(SelectedConversation) && SelectedConversation != null)
             {
                 Messages.Clear();
-                Messages.AddRange(SelectedThread.MessageItems);
+                Task.Run(async () =>
+                {
+                    var conversations = await _smsClient.ListMessagesAsync(SelectedConversation.Id);
+                    _dispatcher.Invoke(() =>
+                    {
+                        Messages.AddRange(conversations);
+                    });
+
+                });
+
             }
         }
     }
