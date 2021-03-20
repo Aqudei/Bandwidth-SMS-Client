@@ -14,7 +14,8 @@ namespace Bandwidth_SMS_Client.Events
     {
         public enum ConversationEventType
         {
-            Created, Deleted
+            Created, Deleted,
+            Updated
         }
         public ConversationEventType EventType { get; set; }
         public Conversation ConversationItem { get; set; }

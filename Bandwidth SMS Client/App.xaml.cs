@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using AutoMapper;
+using Bandwidth_SMS_Client.Models;
 using Bandwidth_SMS_Client.ViewModels;
 using Bandwidth_SMS_Client.Views;
 using Prism.Events;
@@ -25,6 +27,8 @@ namespace Bandwidth_SMS_Client
             containerRegistry.RegisterDialog<SMSComposer, SMSComposerViewModel>();
             containerRegistry.RegisterSingleton<IEventAggregator, EventAggregator>();
             containerRegistry.RegisterSingleton<SMSClient>();
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Conversation, Conversation>());
+            containerRegistry.RegisterInstance(config.CreateMapper());
         }
 
         protected override Window CreateShell()

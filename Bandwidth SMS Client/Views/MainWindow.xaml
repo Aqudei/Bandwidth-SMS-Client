@@ -13,14 +13,17 @@
         Title="Trifecta SMS" Height="600" Width="1000" WindowStartupLocation="CenterScreen">
     <mah:MetroWindow.Resources>
     </mah:MetroWindow.Resources>
-    <DockPanel prism:RegionManager.RegionContext="{Binding Messages}">
+    <DockPanel Margin="8" prism:RegionManager.RegionContext="{Binding Messages}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Button Margin="2" Command="{Binding NewMessageCommand}">New Message</Button>
+            <StackPanel Margin="2,2,2,2" Orientation="Vertical">
+                <Button Command="{Binding NewMessageCommand}" Content="Compose New" Margin="4,4,4,4"/>
+                <TextBox Text="{Binding Filter}" Margin="4,4,4,4"/>
+            </StackPanel>
             <ListView SelectedItem="{Binding SelectedConversation, Mode=TwoWay}"
                       ItemsSource="{Binding Conversations}" Grid.Row="1">
                 <ListView.ItemTemplate>
@@ -42,7 +45,7 @@
                 <Button Command="{Binding SendCommand}" Margin="2,2,2,2" Width="85">Send</Button>
             </StackPanel>
         </Grid>
-        <ScrollViewer DockPanel.Dock="Right" >
+        <ScrollViewer DockPanel.Dock="Right" Margin="2,10,2,2" >
             <ItemsControl ItemsSource="{Binding Messages}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using AutoMapper;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
 using Bandwidth_SMS_Client.Views;
@@ -23,6 +24,7 @@ namespace Bandwidth_SMS_Client.ViewModels
         private readonly IDialogService _dialogService;
         private readonly SMSClient _smsClient;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IMapper _mapper;
         private Message _selectedMessage;
         private string _message;
         private DelegateCommand _sendCommand;
@@ -70,12 +72,13 @@ namespace Bandwidth_SMS_Client.ViewModels
         }
 
         public MainWindowViewModel(IRegionManager regionManager, IDialogService dialogService,
-            SMSClient smsClient, IEventAggregator eventAggregator)
+            SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper)
         {
             _regionManager = regionManager;
             _dialogService = dialogService;
             _smsClient = smsClient;
             _eventAggregator = eventAggregator;
+            _mapper = mapper;
             _dispatcher = Application.Current.Dispatcher;
 
             _dialogService.ShowDialog("Login", result =>
@@ -102,9 +105,24 @@ namespace Bandwidth_SMS_Client.ViewModels
 
         private void _smsClient_ConversationEvent(object sender, ConversationEventPayload e)
         {
-            if (e.EventType == ConversationEventPayload.ConversationEventType.Created)
+            switch (e.EventType)
             {
-                _dispatcher.Invoke(() => Conversations.Add(e.ConversationItem));
+                case ConversationEventPayload.ConversationEventType.Updated:
+                    {
+                        var conversation = Conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
+                        if (conversation != null)
+                        {
+                            _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
+                        }
+
+                        break;
+                    }
+                case ConversationEventPayload.ConversationEventType.Created:
+                    {
+                        if (!Conversations.Contains(e.ConversationItem))
+                            _dispatcher.Invoke(() => Conversations.Add(e.ConversationItem));
+                        break;
+                    }
             }
         }
 
@@ -113,28 +131,27 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case MessageEventPayload.MessageEventType.Created:
-                    _dispatcher.Invoke(() =>
                     {
-                        var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
+                        var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
                         var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                        if (conversation != null && SelectedConversation.Equals(conversation))
+                        if (conversation != null && SelectedConversation != null && SelectedConversation.Equals(conversation))
                         {
-                            Messages.Add(e.MessageItem);
+                            _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
                         }
-                    });
+
+                    }
                     break;
                 case MessageEventPayload.MessageEventType.Deleted:
-                    _dispatcher.Invoke(() =>
                     {
-                        var conversationNumber = e.MessageItem.Message_Type == "INCOMING" ? e.MessageItem.MFrom : e.MessageItem.To;
+                        var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
                         var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                        if (conversation != null && SelectedConversation.Equals(conversation))
+                        if (conversation != null && SelectedConversation != null && SelectedConversation.Equals(conversation))
                         {
-                            Messages.Remove(e.MessageItem);
+                            _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
                         }
-                    });
+                    }
                     break;
             }
         }
@@ -154,7 +171,6 @@ namespace Bandwidth_SMS_Client.ViewModels
             }
         }
 
-
         private void MainWindowViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(SelectedConversation) && SelectedConversation != null)
@@ -167,7 +183,6 @@ namespace Bandwidth_SMS_Client.ViewModels
                     {
                         Messages.AddRange(conversations);
                     });
-
                 });
 
             }

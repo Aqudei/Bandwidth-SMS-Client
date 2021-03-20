@@ -13,8 +13,8 @@
         <converters:MessageTypeToBrushConverter x:Key="MessageTypeToBrushConverter"/>
     </UserControl.Resources>
 
-    <Border Background="{Binding Message_Type, Converter={StaticResource MessageTypeToBrushConverter}}"
-            HorizontalAlignment="{Binding Message_Type, Converter={StaticResource MessageTypeToAlignmentConverter}}"
+    <Border Background="{Binding MessageType, Converter={StaticResource MessageTypeToBrushConverter}}"
+            HorizontalAlignment="{Binding MessageType, Converter={StaticResource MessageTypeToAlignmentConverter}}"
             Padding="15"
             CornerRadius="8"
             Margin="8" 
@@ -30,8 +30,8 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left"><Run Text="From: "/><Run Text=" "/><Run Text="{Binding MFrom}"/></TextBlock>
-            <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding Message_Date}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left"><Run Text="From: "/><Run Text=" "/><Run Text="{Binding From}"/></TextBlock>
+            <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding MessageDate}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 <!--Actions-->
             <StackPanel Grid.Column="2" 
                         Grid.Row="0" 

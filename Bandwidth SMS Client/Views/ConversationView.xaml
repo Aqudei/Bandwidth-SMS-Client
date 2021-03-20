@@ -24,11 +24,15 @@
         </Grid.ColumnDefinitions>
         <Image Width="50" Height="50" Stretch="UniformToFill"  
                Grid.RowSpan="3" 
-               Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}"/>
+               Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}" Margin="0,0,5,0"/>
         <TextBlock Grid.Row="0" 
                    Grid.Column="1" d:Text="Juan dela Cruz (+636213466856)"
                    Text="{Binding PhoneNumber}"
                    FontWeight="Bold"
+                   FontSize="18"
                    Margin="2"/>
+        <TextBlock Grid.Row="1" 
+                   Grid.Column="1" 
+                   Text="{Binding UpdatedAt, StringFormat=\{0:g\}}"/>
     </Grid>
 </UserControl>

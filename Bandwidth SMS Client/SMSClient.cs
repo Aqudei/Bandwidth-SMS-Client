@@ -9,12 +9,14 @@ using System.Net.Http;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Authentication;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Prism.Events;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -50,6 +52,12 @@ namespace Bandwidth_SMS_Client
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
+        JsonSerializerSettings _serializerSetting = new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            ContractResolver = new UnderscorePropertyNamesContractResolver()
+        };
 
         public SMSClient()
         {
@@ -139,8 +147,35 @@ namespace Bandwidth_SMS_Client
                                 ConversationEvent?.Invoke(this, conversationEventPayload);
                                 break;
                             }
+                        case "conversation-updated":
+                            {
+
+                                var conversation = JsonConvert.DeserializeObject<Conversation>(push.Body);
+
+                                var conversationEventPayload = new ConversationEventPayload
+                                {
+                                    EventType = ConversationEventPayload.ConversationEventType.Updated,
+                                    ConversationItem = conversation
+                                };
+
+                                ConversationEvent?.Invoke(this, conversationEventPayload);
+                                break;
+                            }
                     }
                 }
+            }
+        }
+
+        private class UnderscorePropertyNamesContractResolver : DefaultContractResolver
+        {
+            protected override string ResolvePropertyName(string propertyName)
+            {
+                return propertyName.Replace("_", "").ToLower();
+            }
+
+            protected override string ResolveDictionaryKey(string dictionaryKey)
+            {
+                return dictionaryKey.Replace("_", "").ToLower();
             }
         }
 
@@ -186,7 +221,7 @@ namespace Bandwidth_SMS_Client
                         {
                             Recipient = g.Key,
                             Avatar = "",
-                            MessageItems = g.AsEnumerable().OrderBy(mi => mi.Message_Date)
+                            MessageItems = g.AsEnumerable().OrderBy(mi => mi.MessageDate)
                         };
             return query.AsEnumerable();
         }
@@ -194,8 +229,8 @@ namespace Bandwidth_SMS_Client
         public void SendMessage(string recipient, string body)
         {
             var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
-            request.AddParameter("body", body);
-            request.AddParameter("to", recipient);
+            request.AddParameter("Body", body);
+            request.AddParameter("To", recipient);
             var response = RestClient.Execute<MessageItem>(request);
             if (response.StatusCode != HttpStatusCode.Created)
             {
