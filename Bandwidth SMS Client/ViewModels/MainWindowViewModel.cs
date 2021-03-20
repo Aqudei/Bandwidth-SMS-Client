@@ -135,6 +135,11 @@ namespace Bandwidth_SMS_Client.ViewModels
                         var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
                         var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
+                        if (conversation != null)
+                        {
+                            _dispatcher.Invoke(() => conversation.HasNew = true);
+                        }
+
                         if (conversation != null && SelectedConversation != null && SelectedConversation.Equals(conversation))
                         {
                             _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
@@ -176,6 +181,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             if (e.PropertyName == nameof(SelectedConversation) && SelectedConversation != null)
             {
                 Messages.Clear();
+                SelectedConversation.HasNew = false;
                 Task.Run(async () =>
                 {
                     var conversations = await _smsClient.ListMessagesAsync(SelectedConversation.Id);
