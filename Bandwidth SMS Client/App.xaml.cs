@@ -31,6 +31,8 @@ namespace Bandwidth_SMS_Client
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Conversation, Conversation>());
             containerRegistry.RegisterInstance(config.CreateMapper());
             containerRegistry.RegisterInstance(DialogCoordinator.Instance);
+            containerRegistry.RegisterForNavigation(typeof(Messaging), "Messaging");
+            containerRegistry.RegisterForNavigation(typeof(Contacts), "_contacts");
         }
 
         protected override Window CreateShell()

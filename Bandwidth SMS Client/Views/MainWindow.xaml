@@ -14,46 +14,16 @@
         Title="Trifecta SMS" Height="600" Width="1000" WindowStartupLocation="CenterScreen">
     <mah:MetroWindow.Resources>
     </mah:MetroWindow.Resources>
-    <DockPanel Margin="8" prism:RegionManager.RegionContext="{Binding Messages}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-
-            <StackPanel Margin="2,2,2,2" Orientation="Vertical">
-                <Button Command="{Binding NewMessageCommand}" Content="Compose New" Margin="4,4,4,4"/>
-                <TextBox Text="{Binding Filter}" Margin="4,4,4,4"/>
-            </StackPanel>
-            <ListView SelectedItem="{Binding SelectedConversation, Mode=TwoWay}"
-                      ItemsSource="{Binding Conversations}" Grid.Row="1">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <views:ConversationView/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
-
-
-        <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Text="{Binding Message}" MinLines="4" Margin="2,2,2,2"/>
-            <StackPanel Orientation="Vertical" Grid.Column="1">
-                <Button Command="{Binding SendCommand}" Margin="2,2,2,2" Width="85">Send</Button>
-            </StackPanel>
-        </Grid>
-        <ScrollViewer DockPanel.Dock="Right" Margin="2,10,2,2" >
-            <ItemsControl ItemsSource="{Binding Messages}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <views:MessagItemView/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </DockPanel>
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Messaging" FontSize="12" Padding="10,10,10,10" Margin="2,2,2,2" Command="{Binding NavigateCommand}" CommandParameter="Messaging" Width="100" VerticalAlignment="Center"/>
+            <Button Content="_contacts" FontSize="12" Padding="10,10,10,10" Margin="2,2,2,2" Command="{Binding NavigateCommand}" CommandParameter="_contacts" Width="100" VerticalAlignment="Center"/>
+            <Button Content="Settings" FontSize="12" Padding="10,10,10,10" Command="{Binding NavigateCommand}" CommandParameter="Settings" Width="100" VerticalAlignment="Center"/>
+        </StackPanel>
+        <ContentControl prism:RegionManager.RegionName="MainRegion" Grid.Row="1"/>
+    </Grid>
 </mah:MetroWindow>

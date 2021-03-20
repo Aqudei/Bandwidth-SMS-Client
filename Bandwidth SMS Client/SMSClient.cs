@@ -293,6 +293,23 @@ namespace Bandwidth_SMS_Client
 
             return response.Data;
         }
+
+        public Task<IEnumerable<Contact>> ListContactsAsync()
+        {
+            return Task.Run(ListContacts);
+        }
+
+        public IEnumerable<Contact> ListContacts()
+        {
+            var request = new RestRequest("/sms/contacts/", Method.GET, DataFormat.Json);
+            var response = RestClient.Execute<IEnumerable<Contact>>(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
+            }
+
+            return response.Data;
+        }
     }
 
 
