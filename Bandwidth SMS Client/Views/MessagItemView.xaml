@@ -57,7 +57,9 @@
                     FontWeight="Medium"
                     Text="{Binding Body}" 
                     d:Text="This is the body of the message" 
-                    Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    Grid.Row="1" Grid.ColumnSpan="3" 
+                    HorizontalAlignment="Left"
+                    Margin="10,0,0,0"/>
             </Grid>
         </Border>
         <Border BorderThickness="0.5,0,0.5,0.5" 
