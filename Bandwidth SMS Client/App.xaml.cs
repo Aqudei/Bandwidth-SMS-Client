@@ -9,6 +9,7 @@ using AutoMapper;
 using Bandwidth_SMS_Client.Models;
 using Bandwidth_SMS_Client.ViewModels;
 using Bandwidth_SMS_Client.Views;
+using MahApps.Metro.Controls.Dialogs;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Unity;
@@ -29,6 +30,7 @@ namespace Bandwidth_SMS_Client
             containerRegistry.RegisterSingleton<SMSClient>();
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Conversation, Conversation>());
             containerRegistry.RegisterInstance(config.CreateMapper());
+            containerRegistry.RegisterInstance(DialogCoordinator.Instance);
         }
 
         protected override Window CreateShell()

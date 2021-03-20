@@ -185,6 +185,11 @@ namespace Bandwidth_SMS_Client
             Properties.Settings.Default.Save();
         }
 
+        public Task LoginAsync(string username, string password)
+        {
+            return Task.Run(() => Login(username, password));
+        }
+
         public void Login(string username, string password)
         {
             var request = new RestRequest("/api-token-auth/", Method.POST);
@@ -226,6 +231,11 @@ namespace Bandwidth_SMS_Client
             return query.AsEnumerable();
         }
 
+        public Task SendMessageAsync(string recipient, string body)
+        {
+            return Task.Run(() => SendMessage(recipient, body));
+        }
+
         public void SendMessage(string recipient, string body)
         {
             var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
@@ -248,6 +258,11 @@ namespace Bandwidth_SMS_Client
             {
                 throw new HttpRequestException();
             }
+        }
+
+        public Task<IEnumerable<Conversation>> ListConversationsAsync()
+        {
+            return Task.Run(ListConversations);
         }
 
         public IEnumerable<Conversation> ListConversations()

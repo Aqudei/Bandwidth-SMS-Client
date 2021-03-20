@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Threading;
 using AutoMapper;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
 using Bandwidth_SMS_Client.Views;
+using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -25,15 +28,17 @@ namespace Bandwidth_SMS_Client.ViewModels
         private readonly SMSClient _smsClient;
         private readonly IEventAggregator _eventAggregator;
         private readonly IMapper _mapper;
+        private readonly IDialogCoordinator _dialogCoordinator;
         private Message _selectedMessage;
         private string _message;
         private DelegateCommand _sendCommand;
-        private MessageThread _selectedThread;
         private DelegateCommand _newMessageCommand;
         private DelegateCommand<MessageItem> _deleteMessageCommand;
-        private Dispatcher _dispatcher;
+        private readonly Dispatcher _dispatcher;
         private Conversation _selectedConversation;
-        public ObservableCollection<Conversation> Conversations { get; set; } = new ObservableCollection<Conversation>();
+
+        private readonly ObservableCollection<Conversation> _conversations = new ObservableCollection<Conversation>();
+        public ICollectionView Conversations => CollectionViewSource.GetDefaultView(_conversations);
 
         public Conversation SelectedConversation
         {
@@ -65,20 +70,21 @@ namespace Bandwidth_SMS_Client.ViewModels
         public DelegateCommand SendCommand => _sendCommand ??=
             new DelegateCommand(DoSend);
 
-        private void DoSend()
+        private async void DoSend()
         {
-            _smsClient.SendMessage(SelectedConversation.PhoneNumber, Message);
+            await _smsClient.SendMessageAsync(SelectedConversation.PhoneNumber, Message);
             Message = "";
         }
 
         public MainWindowViewModel(IRegionManager regionManager, IDialogService dialogService,
-            SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper)
+            SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper, IDialogCoordinator dialogCoordinator)
         {
             _regionManager = regionManager;
             _dialogService = dialogService;
             _smsClient = smsClient;
             _eventAggregator = eventAggregator;
             _mapper = mapper;
+            _dialogCoordinator = dialogCoordinator;
             _dispatcher = Application.Current.Dispatcher;
 
             _dialogService.ShowDialog("Login", result =>
@@ -91,7 +97,17 @@ namespace Bandwidth_SMS_Client.ViewModels
 
             try
             {
-                Conversations.AddRange(_smsClient.ListConversations());
+                Task.Run(async () =>
+                {
+                    var conversations = await _smsClient.ListConversationsAsync();
+                    var progress = await _dialogCoordinator.ShowProgressAsync(this, "Trifecta SMS", "Loading SMS");
+
+                    await _dispatcher.Invoke(async () =>
+                    {
+                        _conversations.AddRange(conversations);
+                        await progress.CloseAsync();
+                    });
+                });
             }
             catch
             {
@@ -109,7 +125,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             {
                 case ConversationEventPayload.ConversationEventType.Updated:
                     {
-                        var conversation = Conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
+                        var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
                         if (conversation != null)
                         {
                             _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
@@ -120,7 +136,7 @@ namespace Bandwidth_SMS_Client.ViewModels
                 case ConversationEventPayload.ConversationEventType.Created:
                     {
                         if (!Conversations.Contains(e.ConversationItem))
-                            _dispatcher.Invoke(() => Conversations.Add(e.ConversationItem));
+                            _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
                         break;
                     }
             }
@@ -133,7 +149,7 @@ namespace Bandwidth_SMS_Client.ViewModels
                 case MessageEventPayload.MessageEventType.Created:
                     {
                         var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                        var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
                         if (conversation != null)
                         {
@@ -150,7 +166,7 @@ namespace Bandwidth_SMS_Client.ViewModels
                 case MessageEventPayload.MessageEventType.Deleted:
                     {
                         var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                        var conversation = Conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
                         if (conversation != null && SelectedConversation != null && SelectedConversation.Equals(conversation))
                         {

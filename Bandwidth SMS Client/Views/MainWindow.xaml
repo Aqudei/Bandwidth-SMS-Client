@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:Bandwidth_SMS_Client"
         xmlns:models="clr-namespace:Bandwidth_SMS_Client.Models"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        mah:DialogParticipation.Register="{Binding}"
         xmlns:views="clr-namespace:Bandwidth_SMS_Client.Views"
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"

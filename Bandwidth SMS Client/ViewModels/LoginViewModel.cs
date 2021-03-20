@@ -38,11 +38,11 @@ namespace Bandwidth_SMS_Client.ViewModels
             get { return _loginCommand ??= new DelegateCommand(DoLogin); }
         }
 
-        private void DoLogin()
+        private async void DoLogin()
         {
             try
             {
-                _client.Login(Username, Password);
+                await _client.LoginAsync(Username, Password);
                 RequestClose?.Invoke(new DialogResult(ButtonResult.OK));
             }
             catch (Exception e)

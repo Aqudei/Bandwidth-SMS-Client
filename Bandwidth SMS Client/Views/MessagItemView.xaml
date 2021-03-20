@@ -13,50 +13,59 @@
         <converters:MessageTypeToBrushConverter x:Key="MessageTypeToBrushConverter"/>
     </UserControl.Resources>
 
-    <Border Background="{Binding MessageType, Converter={StaticResource MessageTypeToBrushConverter}}"
-            HorizontalAlignment="{Binding MessageType, Converter={StaticResource MessageTypeToAlignmentConverter}}"
+    <Grid Margin="16" 
+          Width="600" 
+          HorizontalAlignment="{Binding MessageType, Converter={StaticResource MessageTypeToAlignmentConverter}}">
+       
+        <Border Background="{Binding MessageType, Converter={StaticResource MessageTypeToBrushConverter}}"
             Padding="15"
-            CornerRadius="8"
-            Margin="8" 
-            Width="600">
-        <Grid >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+            CornerRadius="30">
 
-            <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left"><Run Text="From: "/><Run Text=" "/><Run Text="{Binding From}"/></TextBlock>
-            <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding MessageDate}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-<!--Actions-->
-            <StackPanel Grid.Column="2" 
-                        Grid.Row="0" 
-                        Orientation="Horizontal" 
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Right" 
-                        Margin="2">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
 
-                <Button HorizontalContentAlignment="Center"
+                <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left"><Run Text="From: "/><Run Text=" "/><Run Text="{Binding From}"/></TextBlock>
+                <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding MessageDate}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                <!--Actions-->
+                <StackPanel Grid.Column="2" 
+                    Grid.Row="0" 
+                    Orientation="Horizontal" 
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right" 
+                    Margin="2">
+
+                    <Button HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         VerticalAlignment="Center" 
                         HorizontalAlignment="Center"
                         CommandParameter="{Binding}"
-                        Command="{Binding DataContext.DeleteMessageCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}">
-                    <ico:BootstrapIcons Kind="Trash"></ico:BootstrapIcons>
-                </Button>
-            </StackPanel>
+                        Command="{Binding DataContext.DeleteMessageCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}" Content="{ico:BootstrapIcons Trash}"/>
+                </StackPanel>
 
-            <!--End Action-->
-            <TextBlock TextWrapping="Wrap" 
-                       Grid.Column="0"
-                       FontSize="16"
-                       Text="{Binding Body}" 
-                       d:Text="This is the body of the message" 
-                       Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Center"/>
-        </Grid>
-    </Border>
+                <!--End Action-->
+                <TextBlock TextWrapping="Wrap" 
+                    Grid.Column="0"
+                    FontSize="20"
+                    FontWeight="Medium"
+                    Text="{Binding Body}" 
+                    d:Text="This is the body of the message" 
+                    Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+            </Grid>
+        </Border>
+        <Border BorderThickness="0.5,0,0.5,0.5" 
+                BorderBrush="{StaticResource MahApps.Brushes.Accent4}" 
+                OpacityMask="#FF8D8D8D" CornerRadius="30,30,30,30">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="5" />
+            </Border.Effect>
+        </Border>
+    </Grid>
 </UserControl>
