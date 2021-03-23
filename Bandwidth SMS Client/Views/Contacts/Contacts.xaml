@@ -13,7 +13,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel LastChildFill="True">
+        <TextBox DockPanel.Dock="Top" Margin="4"
+                 Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         <ListView DockPanel.Dock="Left" 
+                  Margin="4"
                   ItemsSource="{Binding Contacts}"
                   SelectedItem="{Binding SelectedContact,Mode=TwoWay}" 
                   ScrollViewer.CanContentScroll="True" 

@@ -48,7 +48,8 @@ namespace Bandwidth_SMS_Client
     {
         private string _token;
         //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
-        public RestClient RestClient = new RestClient("https://smstrifecta.ga");
+        //public RestClient RestClient = new RestClient("https://smstrifecta.ga");
+        public RestClient RestClient = new RestClient("https://sms.tripbx.com:8443");
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
@@ -64,6 +65,9 @@ namespace Bandwidth_SMS_Client
             _worker = new BackgroundWorker();
             _worker.DoWork += _worker_DoWork;
             _worker.WorkerReportsProgress = true;
+
+            RestClient.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+
         }
 
         private DateTime ReadLastPull()
@@ -304,6 +308,26 @@ namespace Bandwidth_SMS_Client
             var request = new RestRequest("/sms/contacts/", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<Contact>>(request);
             if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
+            }
+
+            return response.Data;
+        }
+
+        public Task<Contact> SaveContactAsync(Contact contact)
+        {
+            return Task.Run(() => SaveContact(contact));
+        }
+
+        public Contact SaveContact(Contact contact)
+        {
+            var resource = contact.Id == 0 ? $"/sms/contacts/" : $"/sms/contacts/{contact.Id}/";
+            var method = contact.Id == 0 ? Method.POST : Method.PATCH;
+            var request = new RestRequest(resource, method, DataFormat.Json);
+            request.AddJsonBody(contact);
+            var response = RestClient.Execute<Contact>(request);
+            if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
             {
                 throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
             }

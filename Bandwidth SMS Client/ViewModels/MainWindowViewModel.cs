@@ -39,7 +39,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             _regionManager = regionManager;
             _dispatcher = Application.Current.Dispatcher;
 
-            dialogService.ShowDialog("Login", result =>
+            dialogService.ShowDialog("Login", null, result =>
             {
                 if (result.Result == ButtonResult.Abort)
                 {

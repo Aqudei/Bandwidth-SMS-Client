@@ -20,7 +20,7 @@ using Prism.Services.Dialogs;
 
 namespace Bandwidth_SMS_Client.ViewModels
 {
-    class MessagingViewModel : BindableBase
+    class MessagingViewModel : BindableBase, INavigationAware
     {
         private readonly IRegionManager _regionManager;
         private readonly IDialogService _dialogService;
@@ -85,8 +85,6 @@ namespace Bandwidth_SMS_Client.ViewModels
             _mapper = mapper;
             _dialogCoordinator = dialogCoordinator;
             _dispatcher = Application.Current.Dispatcher;
-
-         
 
             try
             {
@@ -204,6 +202,20 @@ namespace Bandwidth_SMS_Client.ViewModels
                 });
 
             }
+        }
+
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+
+        }
+
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            return true;
+        }
+
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
         }
     }
 }

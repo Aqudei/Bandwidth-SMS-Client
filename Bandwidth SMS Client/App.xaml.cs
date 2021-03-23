@@ -14,6 +14,8 @@ using Bandwidth_SMS_Client.Views.Contacts;
 using MahApps.Metro.Controls.Dialogs;
 using Prism.Events;
 using Prism.Ioc;
+using Prism.Regions;
+using Prism.Services.Dialogs;
 using Prism.Unity;
 
 namespace Bandwidth_SMS_Client
@@ -33,7 +35,8 @@ namespace Bandwidth_SMS_Client
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Conversation, Conversation>();
-                cfg.CreateMap<Contact, ContactEditorViewModel>();
+                cfg.CreateMap<Contact, ContactEditorViewModel>().ReverseMap();
+                cfg.CreateMap<Contact, Contact>();
             });
             containerRegistry.RegisterInstance(config.CreateMapper());
             containerRegistry.RegisterInstance(DialogCoordinator.Instance);
