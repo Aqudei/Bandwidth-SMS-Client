@@ -81,7 +81,11 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
             Task.Run(async () =>
             {
                 var contacts = await _smsClient.ListContactsAsync();
-                _dispatcher.Invoke(() => _contacts.AddRange(contacts));
+                _dispatcher.Invoke(() =>
+                {
+                    _contacts.Clear();
+                    _contacts.AddRange(contacts);
+                });
             });
         }
 
