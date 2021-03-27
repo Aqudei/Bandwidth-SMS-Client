@@ -7,10 +7,8 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
-             mc:Ignorable="d" d:Height="295" 
-             d:Width="639" 
-             d:DesignWidth="471" 
-             d:DesignHeight="133.5">
+             mc:Ignorable="d" 
+             Padding="30">
     <Grid>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
@@ -21,9 +19,9 @@
                 <Label Width="100" FontSize="18" VerticalAlignment="Center" VerticalContentAlignment="Center">Password:</Label>
                 <PasswordBox x:Name="PasswordBox" Width="300" PasswordChanged="PasswordBox_PasswordChanged_1" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="2,2,2,2" HorizontalAlignment="Center">
-                <Button  Command="{Binding LoginCommand}" Width="100" Margin="2,2,2,2">Login</Button>
-                <Button Command="{Binding ExitCommand}" Width="100" Margin="2,2,2,2">Exit</Button>
+            <StackPanel Orientation="Horizontal" Margin="2,2,2,2" HorizontalAlignment="Right">
+                <Button  Command="{Binding LoginCommand}" Width="100" Margin="10,2,10,2">Login</Button>
+                <Button Command="{Binding ExitCommand}" Width="100" Margin="10,2,10,2">Exit</Button>
             </StackPanel>
         </StackPanel>
 

@@ -20,7 +20,9 @@
 
             <Button Command="{Binding NewMessageCommand}" Content="Compose New" Margin="4,4,4,4"/>
             <ListView SelectedItem="{Binding SelectedConversation, Mode=TwoWay}"
-                      ItemsSource="{Binding Conversations}" Grid.Row="1">
+                      ItemsSource="{Binding Conversations}" 
+                      Grid.Row="1"
+                      Width="400">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <local:ConversationView/>
@@ -30,24 +32,29 @@
         </Grid>
 
 
-        <Grid DockPanel.Dock="Top">
+        <Grid DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+
             <TextBox Text="{Binding Message}" MinLines="4" Margin="8"/>
+
             <StackPanel Orientation="Vertical" Grid.Column="1">
                 <Button Command="{Binding SendCommand}" Margin="8" Width="85">Send</Button>
             </StackPanel>
+
         </Grid>
-        <ScrollViewer DockPanel.Dock="Right" Margin="8" >
-            <ItemsControl ItemsSource="{Binding Messages}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:MessagItemView/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+        <GroupBox Header="Messages" DockPanel.Dock="Right" Margin="8">
+            <ScrollViewer >
+                <ItemsControl ItemsSource="{Binding Messages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:MessagItemView />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </GroupBox>
     </DockPanel>
 </UserControl>

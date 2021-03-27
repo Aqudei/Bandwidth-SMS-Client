@@ -193,10 +193,10 @@ namespace Bandwidth_SMS_Client.ViewModels
                 {
                     var progress =
                         await _dialogCoordinator.ShowProgressAsync(this, "Please wait...", "Fetching messages");
-                    var conversations = await _smsClient.ListMessagesAsync(SelectedConversation.Id);
+                    var messages = await _smsClient.ListMessagesAsync(SelectedConversation.Id);
                     await _dispatcher.Invoke(async () =>
                     {
-                        Messages.AddRange(conversations);
+                        Messages.AddRange(messages);
                         await progress.CloseAsync();
                     });
                 });

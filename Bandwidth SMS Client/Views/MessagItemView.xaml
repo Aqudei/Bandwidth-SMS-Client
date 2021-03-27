@@ -32,7 +32,11 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left"><Run Text="From: "/><Run Text=" "/><Run Text="{Binding From}"/></TextBlock>
+                <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left">
+                    <Run Text="From: "/>
+                    <Run Text=" "/>
+                    <Run Text="{Binding DisplayName, Mode=OneWay}"/>
+                </TextBlock>
                 <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding MessageDate}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 <!--Actions-->
                 <StackPanel Grid.Column="2" 

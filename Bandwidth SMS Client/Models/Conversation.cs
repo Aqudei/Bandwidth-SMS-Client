@@ -8,6 +8,18 @@ namespace Bandwidth_SMS_Client.Models
         private string _avatar;
         private DateTime _updatedAt;
         private bool _hasNew;
+        private string _name;
+        public string PhoneNumber { get; set; }
+        public string OwnerPhone { get; set; }
+        public int Id { get; set; }
+        public string DisplayName => string.IsNullOrEmpty(Name) ? "UNKNOWN" : Name;
+
+
+        public string Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
+        }
 
         public string Avatar
         {
@@ -21,9 +33,7 @@ namespace Bandwidth_SMS_Client.Models
             set => SetProperty(ref _hasNew, value);
         }
 
-        public string PhoneNumber { get; set; }
-        public string OwnerPhone { get; set; }
-        public int Id { get; set; }
+
 
         public DateTime UpdatedAt
         {

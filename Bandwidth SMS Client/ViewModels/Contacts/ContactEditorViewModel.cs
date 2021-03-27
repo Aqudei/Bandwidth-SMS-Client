@@ -93,6 +93,7 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
+       
         }
     }
 }

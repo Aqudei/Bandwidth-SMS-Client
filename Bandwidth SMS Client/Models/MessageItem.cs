@@ -9,6 +9,7 @@ namespace Bandwidth_SMS_Client.Models
     {
         public int Id { get; set; }
         private bool _isNew = false;
+        private string _name;
         public string Body { get; set; }
         public string MessageType { get; set; }
         public string From { get; set; }
@@ -17,6 +18,38 @@ namespace Bandwidth_SMS_Client.Models
         public DateTime? MessageDate { get; set; }
         public string MessageBWID { get; set; }
         public string GroupingPhone => MessageType == "OUTGOING" ? To : From;
+        public string DisplayName
+        {
+            get
+            {
+                string displayName;
+
+                if (MessageType == "OUTGOING")
+                {
+                    displayName = "Me";
+                }
+                else
+                {
+                    displayName = Name;
+                    if (string.IsNullOrWhiteSpace(displayName))
+                    {
+                        displayName = From;
+                    }
+                }
+
+                return displayName;
+            }
+        }
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                SetProperty(ref _name, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
+        }
 
         public bool IsNew
         {

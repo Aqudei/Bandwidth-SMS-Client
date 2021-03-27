@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -96,6 +97,9 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
+            var view = _regionManager.Regions["ActionRegion"].ActiveViews.FirstOrDefault();
+            if (view != null)
+                _regionManager.Regions["ActionRegion"].Deactivate(view);
 
         }
     }

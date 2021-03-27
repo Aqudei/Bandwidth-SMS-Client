@@ -13,15 +13,15 @@
     <GroupBox Header="Contact EDITOR" Margin="20" Width="400">
         <Grid>
             <StackPanel Orientation="Vertical">
-                <Label Margin="8,0,8,0">Phone Number:</Label>
+                <Label Margin="8,0,8,0">Name:</Label>
                 <TextBox FontSize="18" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,8,20"/>
 
-                <Label Margin="8,0,8,0">Name:</Label>
+                <Label Margin="8,0,8,0">Phone Number:</Label>
                 <TextBox FontSize="18" Text="{Binding PhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,8,20"/>
 
                 <Label Margin="8,0,8,0">Avatar:</Label>
                 <TextBox FontSize="18" Text="{Binding Avatar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,8,0"/>
-    <Button HorizontalAlignment="Right" Margin="0,2,8,0">Browser</Button>
+                <Button HorizontalAlignment="Right" Margin="0,2,8,0" Content="Browse"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button Command="{Binding SaveCommand}" Margin="8,8,8,8" Width="100">
                         <StackPanel Orientation="Horizontal">

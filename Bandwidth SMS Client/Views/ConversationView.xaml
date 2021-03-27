@@ -14,31 +14,45 @@
         <converters:AvatarToImageConverter x:Key="AvatarToImageConverter"/>
         <BitmapImage x:Key="BlankImage" UriSource="pack://application:,,,/Resources/Person.jpg"/>
     </UserControl.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+    <Border BorderThickness="0,0,0,2" 
+            BorderBrush="#9B70C4FF" 
+            Padding="0,0,0,2">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
 
-        <Image Width="60" Height="60" 
-               Stretch="UniformToFill"  
-                Grid.RowSpan="3" 
+            <Image Width="72" Height="72" 
+                Stretch="UniformToFill"  
+                Grid.RowSpan="4" 
+                VerticalAlignment="Top"
                 Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}" Margin="0,0,5,0"/>
-        <TextBlock Grid.Row="0" 
+            <!--Name-->
+            <TextBlock Grid.Row="0" 
+                VerticalAlignment="Top"
                 Grid.Column="1" d:Text="Juan dela Cruz (+636213466856)"
-                Text="{Binding PhoneNumber}"
                 FontWeight="Bold"
                 FontSize="20"
-                Margin="2"/>
-        <TextBlock Grid.Row="1" 
+                Margin="2" Text="{Binding DisplayName}"/>
+
+            <TextBlock Grid.Row="1" 
+                VerticalAlignment="Top"
+                Grid.Column="1" d:Text="Juan dela Cruz (+636213466856)"
+                FontWeight="Bold"
+                FontSize="20"
+                Margin="2"><Run Text=" ("/><Run Text=" "/><Run Text="{Binding PhoneNumber}"/><Run Text=" "/><Run Text=")"/></TextBlock>
+            <TextBlock Grid.Row="2" 
+                VerticalAlignment="Top"
                 Grid.Column="1" 
                 Text="{Binding UpdatedAt, StringFormat=\{0:g\}}"/>
-        <Border Grid.Column="1" 
+            <Border Grid.Column="1" 
                 CornerRadius="20"
                 Visibility="{Binding HasNew, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Background="{StaticResource ResourceKey=MahApps.Brushes.Accent3}"
@@ -47,17 +61,18 @@
                 Margin="4"
                 Padding="4,2,4,2" 
                 RenderTransformOrigin="0.5,0.5">
-            <Border.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform Angle="-10"/>
-                    <TranslateTransform X="0" Y="-10"/>
-                </TransformGroup>
-            </Border.RenderTransform>
-            <TextBlock
-                HorizontalAlignment="Center"
-                Text="NEW"/>
-        </Border>
-    </Grid>
+                <Border.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-10"/>
+                        <TranslateTransform X="0" Y="-10"/>
+                    </TransformGroup>
+                </Border.RenderTransform>
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    Text="NEW"/>
+            </Border>
+        </Grid>
+    </Border>
 </UserControl>
