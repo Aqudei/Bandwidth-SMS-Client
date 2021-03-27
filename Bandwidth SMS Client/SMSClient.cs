@@ -248,8 +248,9 @@ namespace Bandwidth_SMS_Client
             var response = RestClient.Execute<MessageItem>(request);
             if (response.StatusCode != HttpStatusCode.Created)
             {
-                Debug.WriteLine($"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}");
-                throw new HttpRequestException();
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
             }
         }
 
@@ -260,7 +261,9 @@ namespace Bandwidth_SMS_Client
             var response = RestClient.Execute(request);
             if (response.StatusCode != HttpStatusCode.NoContent)
             {
-                throw new HttpRequestException();
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
             }
         }
 
@@ -275,7 +278,9 @@ namespace Bandwidth_SMS_Client
             var response = RestClient.Execute<IEnumerable<Conversation>>(request);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
             }
 
             return response.Data;
