@@ -10,9 +10,9 @@
              mc:Ignorable="d"
              Padding="4">
     <UserControl.Resources>
+        <BitmapImage x:Key="BlankImage" UriSource="pack://application:,,,/Resources/Person.jpg"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:AvatarToImageConverter x:Key="AvatarToImageConverter"/>
-        <BitmapImage x:Key="BlankImage" UriSource="pack://application:,,,/Resources/Person.jpg"/>
     </UserControl.Resources>
     <Border BorderThickness="0,0,0,2" 
             BorderBrush="#9B70C4FF" 

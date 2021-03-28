@@ -8,20 +8,30 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <GroupBox Header="Contact EDITOR" Margin="20" Width="400">
+             mc:Ignorable="d" >
+    <UserControl.Resources>
+        <BitmapImage x:Key="BlankImage" UriSource="pack://application:,,,/Resources/Person.jpg"/>
+    </UserControl.Resources>
+    <GroupBox Header="Contact EDITOR" Margin="20">
         <Grid>
-            <StackPanel Orientation="Vertical">
+            <StackPanel Grid.Column="0" Orientation="Vertical" Width="300">
+                <StackPanel VerticalAlignment="Top" 
+                            Orientation="Vertical">
+                    <Image Width="200"
+                           Source="{Binding Avatar, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}"
+                           Height="200" Margin="0,20,0,0"/>
+                    <Button Command="{Binding BrowseAvatarCommand}" 
+                            HorizontalAlignment="Center" 
+                            Margin="5,5,5,5" 
+                            Content="Browse"/>
+                </StackPanel>
+
                 <Label Margin="8,0,8,0">Name:</Label>
                 <TextBox FontSize="18" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,8,20"/>
 
                 <Label Margin="8,0,8,0">Phone Number:</Label>
                 <TextBox FontSize="18" Text="{Binding PhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,8,20"/>
 
-                <Label Margin="8,0,8,0">Avatar:</Label>
-                <TextBox FontSize="18" Text="{Binding Avatar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,8,0"/>
-                <Button HorizontalAlignment="Right" Margin="0,2,8,0" Content="Browse"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button Command="{Binding SaveCommand}" Margin="8,8,8,8" Width="100">
                         <StackPanel Orientation="Horizontal">

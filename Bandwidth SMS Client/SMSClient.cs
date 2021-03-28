@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Resources;
 using System.Windows.Threading;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
@@ -20,6 +22,7 @@ using Newtonsoft.Json.Serialization;
 using Prism.Events;
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Serialization;
 
 namespace Bandwidth_SMS_Client
 {
@@ -47,12 +50,13 @@ namespace Bandwidth_SMS_Client
     public class SMSClient
     {
         private string _token;
-        //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
+        public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
         //public RestClient RestClient = new RestClient("https://smstrifecta.ga");
-        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080");
+        //public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080");
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
+        public event EventHandler<ContactUpdatedPayload> ContactUpdatedEvent;
         JsonSerializerSettings _serializerSetting = new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -153,7 +157,6 @@ namespace Bandwidth_SMS_Client
                             }
                         case "conversation-updated":
                             {
-
                                 var conversation = JsonConvert.DeserializeObject<Conversation>(push.Body);
 
                                 var conversationEventPayload = new ConversationEventPayload
@@ -165,6 +168,29 @@ namespace Bandwidth_SMS_Client
                                 ConversationEvent?.Invoke(this, conversationEventPayload);
                                 break;
                             }
+                        case "contact-created":
+                            {
+                                var contact = JsonConvert.DeserializeObject<Contact>(push.Body);
+                                var payload = new ContactUpdatedPayload
+                                {
+                                    Contact = contact,
+                                    UpdateType = ContactUpdatedPayload.UpdateTypes.Created
+                                };
+                                ContactUpdatedEvent?.Invoke(this, payload);
+                                break;
+                            }
+                        case "contact-updated":
+                            {
+                                var contact = JsonConvert.DeserializeObject<Contact>(push.Body);
+                                var payload = new ContactUpdatedPayload
+                                {
+                                    Contact = contact,
+                                    UpdateType = ContactUpdatedPayload.UpdateTypes.Updated
+                                };
+                                ContactUpdatedEvent?.Invoke(this, payload);
+                                break;
+                            }
+
                     }
                 }
             }
@@ -334,10 +360,50 @@ namespace Bandwidth_SMS_Client
             var response = RestClient.Execute<Contact>(request);
             if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
             {
-                throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
             }
 
             return response.Data;
+        }
+
+        public Task DeleteContactAsync(Contact contact)
+        {
+            return Task.Run(() => DeleteContact(contact));
+        }
+
+        public void DeleteContact(Contact contact)
+        {
+            var resource = $"/sms/contacts/{contact.Id}/";
+            var request = new RestRequest(resource, Method.DELETE, DataFormat.Json);
+            var response = RestClient.Execute(request);
+            if (response.StatusCode != HttpStatusCode.NoContent)
+            {
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
+            }
+        }
+
+        public Task UploadPhotoAsync(Contact contact, string avatar)
+        {
+            return Task.Run(() => UploadPhoto(contact, avatar));
+        }
+
+        public void UploadPhoto(Contact contact, string avatar)
+        {
+            var ext = Path.GetExtension(avatar);
+            var resource = $"/sms/upload/{contact.Id}/{Path.GetFileName(avatar)}/";
+            var request = new RestRequest(resource, Method.POST, DataFormat.Json);
+            request.AddFile("Avatar", avatar, $"image/{ext.Trim(".".ToCharArray())}");
+            var response = RestClient.Execute(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
+            }
         }
     }
 

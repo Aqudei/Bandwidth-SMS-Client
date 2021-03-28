@@ -1,6 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -24,7 +28,17 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
         private DelegateCommand<Contact> _editContactCommand;
         private Contact _selectedContact;
         private string _search;
+        private DelegateCommand _newContactCommand;
+        private DelegateCommand<Contact> _deleteContactCommand;
+        private string _mediaPath;
         public ICollectionView Contacts => CollectionViewSource.GetDefaultView(_contacts);
+
+        public DelegateCommand NewContactCommand => _newContactCommand ??= new DelegateCommand(DoNewContact);
+
+        private void DoNewContact()
+        {
+            _regionManager.RequestNavigate("ActionRegion", "ContactEditor");
+        }
 
         public string Search
         {
@@ -47,6 +61,10 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
             _dispatcher = Application.Current.Dispatcher;
             _eventAggregator.GetEvent<ContactUpdated>().Subscribe(ContactUpdated);
             PropertyChanged += ContactsViewModel_PropertyChanged;
+
+            _mediaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "BandwidthSMS");
+            Directory.CreateDirectory(_mediaPath);
         }
 
         private void ContactsViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -69,6 +87,20 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
         }
 
         public DelegateCommand<Contact> EditContactCommand => _editContactCommand ??= new DelegateCommand<Contact>(DoEditContact);
+        public DelegateCommand<Contact> DeleteContactCommand => _deleteContactCommand ??= new DelegateCommand<Contact>(DoDeleteContact);
+
+        private async void DoDeleteContact(Contact contact)
+        {
+            try
+            {
+                await _smsClient.DeleteContactAsync(contact);
+                _contacts.Remove(contact);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
 
         private void DoEditContact(Contact contact)
         {
@@ -82,10 +114,12 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
             Task.Run(async () =>
             {
                 var contacts = await _smsClient.ListContactsAsync();
+                var enumerable = contacts as Contact[] ?? contacts.ToArray();
+               
                 _dispatcher.Invoke(() =>
                 {
                     _contacts.Clear();
-                    _contacts.AddRange(contacts);
+                    _contacts.AddRange(enumerable);
                 });
             });
         }

@@ -13,12 +13,15 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel LastChildFill="True">
-        <TextBox DockPanel.Dock="Top" Margin="4"
-                 Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBox Width="250"
+                     Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="4,4,4,4" mah:TextBoxHelper.Watermark="SEARCH"/>
+            <Button Margin="4,4,4,4" Command="{Binding NewContactCommand}">New Contact</Button>
+        </StackPanel>
         <ListView DockPanel.Dock="Left" 
                   Margin="4"
                   ItemsSource="{Binding Contacts}"
-                  SelectedItem="{Binding SelectedContact,Mode=TwoWay}" 
+                  SelectedItem="{Binding SelectedContact, Mode=TwoWay}" 
                   ScrollViewer.CanContentScroll="True" 
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">

@@ -1,12 +1,16 @@
-﻿<UserControl x:Class="Bandwidth_SMS_Client.Views.Contacts.ContactItem"
+﻿<UserControl
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
+             xmlns:Converters="clr-namespace:Bandwidth_SMS_Client.Converters" x:Class="Bandwidth_SMS_Client.Views.Contacts.ContactItem"
              mc:Ignorable="d" Margin="20"
-             d:DesignHeight="185.129" d:DesignWidth="361.442" >
+             d:DesignHeight="300" d:DesignWidth="400" >
+    <UserControl.Resources>
+        <Converters:AvatarToImageConverter x:Key="AvatarToImageConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Border BorderThickness="1,1,1,1" 
                 BorderBrush="Black">
@@ -16,17 +20,24 @@
             <Rectangle Fill="{StaticResource MahApps.Brushes.Accent4}"/>
         </Border>
         <StackPanel Orientation="Vertical" Margin="40">
+            <Image Margin="4" 
+                   Width="150" 
+                   Height="150" 
+                   Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}}"/>
             <TextBlock d:Text="Archie Cortez"  Text="{Binding Name, FallbackValue=NO NAME, TargetNullValue=NO NAME}" FontSize="32" HorizontalAlignment="Center" FontWeight="Bold"/>
             <TextBlock d:Text="+639213466856"  Text="{Binding PhoneNumber}" FontSize="20" HorizontalAlignment="Center"/>
-            <Button VerticalContentAlignment="Center" 
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button VerticalContentAlignment="Center" 
                     Command="{Binding DataContext.EditContactCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"
-                    CommandParameter="{Binding}"
-                    HorizontalAlignment="Center" 
-                    Margin="5,5,5,5" 
+                    CommandParameter="{Binding}" 
                     BorderThickness="1"
-                    BorderBrush="Black">
-                <ico:FontAwesome Kind="PenSolid"></ico:FontAwesome>
-            </Button>
+                    BorderBrush="Black" Content="{ico:FontAwesome PenSolid}" Margin="5,5,5,5"/>
+                <Button VerticalContentAlignment="Center" 
+                    Command="{Binding DataContext.DeleteContactCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"
+                    CommandParameter="{Binding}" 
+                    BorderThickness="1"
+                    BorderBrush="Black" Content="{ico:FontAwesome TrashAltRegular}" Margin="5,5,5,5"/>
+            </StackPanel>
         </StackPanel>
 
 
