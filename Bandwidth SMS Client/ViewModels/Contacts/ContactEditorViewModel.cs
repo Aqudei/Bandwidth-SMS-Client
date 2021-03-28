@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows.Xps.Serialization;
 using AutoMapper;
@@ -95,12 +96,14 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
                 var updateType = contact.Id == 0
                     ? ContactUpdatedPayload.UpdateTypes.Created
                     : ContactUpdatedPayload.UpdateTypes.Updated;
-                contact = await _smsClient.SaveContactAsync(contact);
-
                 if (_isAvatarDirty)
                 {
-                    await _smsClient.UploadPhotoAsync(contact, Avatar);
+                    var base64String = Convert.ToBase64String(await File.ReadAllBytesAsync(Avatar));
+                    contact.Avatar = base64String;
                 }
+                contact = await _smsClient.SaveContactAsync(contact);
+
+               
 
                 _eventAggregator.GetEvent<ContactUpdated>().Publish(new ContactUpdatedPayload
                 {
