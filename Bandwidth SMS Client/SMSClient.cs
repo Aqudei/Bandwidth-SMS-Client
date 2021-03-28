@@ -50,9 +50,9 @@ namespace Bandwidth_SMS_Client
     public class SMSClient
     {
         private string _token;
-        public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
+        //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
         //public RestClient RestClient = new RestClient("https://smstrifecta.ga");
-        //public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080");
+        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080");
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
