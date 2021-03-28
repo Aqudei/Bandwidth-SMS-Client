@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Threading;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
+using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -23,6 +24,7 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
         private readonly SMSClient _smsClient;
         private readonly IRegionManager _regionManager;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IDialogCoordinator _dialogCoordinator;
         private readonly Dispatcher _dispatcher;
         private readonly ObservableCollection<Contact> _contacts = new ObservableCollection<Contact>();
         private DelegateCommand<Contact> _editContactCommand;
@@ -53,11 +55,12 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
         }
 
         public ContactsViewModel(SMSClient smsClient, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator, IDialogCoordinator dialogCoordinator)
         {
             _smsClient = smsClient;
             _regionManager = regionManager;
             _eventAggregator = eventAggregator;
+            _dialogCoordinator = dialogCoordinator;
             _dispatcher = Application.Current.Dispatcher;
             _eventAggregator.GetEvent<ContactUpdated>().Subscribe(ContactUpdated);
             PropertyChanged += ContactsViewModel_PropertyChanged;
@@ -73,8 +76,26 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
             {
                 if (!string.IsNullOrWhiteSpace(Search))
                 {
-                    Contacts.Filter = s => s is Contact contact &&
-                                           contact.PhoneNumber.Contains(Search);
+
+                    Contacts.Filter = s =>
+                    {
+                        var contact = s as Contact;
+
+                        var include = contact != null &&
+                            contact.PhoneNumber.Contains(Search);
+
+
+                        if (contact != null && !string.IsNullOrWhiteSpace(contact.Name))
+                        {
+                            include |= contact.Name.Contains(Search);
+                        }
+
+                        return include;
+                    };
+                }
+                else
+                {
+                    Contacts.Filter = s => true;
                 }
             }
         }
@@ -113,13 +134,17 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
         {
             Task.Run(async () =>
             {
+                var wait = await _dialogCoordinator.ShowProgressAsync(this, "Please wait",
+                    "Fetching contacts from server");
+                wait.SetIndeterminate();
                 var contacts = await _smsClient.ListContactsAsync();
                 var enumerable = contacts as Contact[] ?? contacts.ToArray();
-               
-                _dispatcher.Invoke(() =>
+
+                await _dispatcher.Invoke(async () =>
                 {
                     _contacts.Clear();
                     _contacts.AddRange(enumerable);
+                    await wait.CloseAsync();
                 });
             });
         }

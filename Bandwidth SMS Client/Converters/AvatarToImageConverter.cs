@@ -13,18 +13,27 @@ namespace Bandwidth_SMS_Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            string s = value as string;
+            var s = value as string;
 
-            if (s == null)
+            if (string.IsNullOrWhiteSpace(s))
                 return null;
 
-            BitmapImage bi = new BitmapImage();
+            try
+            {
 
-            bi.BeginInit();
-            bi.StreamSource = new MemoryStream(System.Convert.FromBase64String(s));
-            bi.EndInit();
+                var bi = new BitmapImage();
 
-            return bi;
+                bi.BeginInit();
+                bi.StreamSource = new MemoryStream(System.Convert.FromBase64String(s));
+                bi.EndInit();
+
+                return bi;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

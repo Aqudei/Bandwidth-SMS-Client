@@ -10,6 +10,7 @@
              d:DesignHeight="300" d:DesignWidth="400" >
     <UserControl.Resources>
         <Converters:AvatarToImageConverter x:Key="AvatarToImageConverter"/>
+        <BitmapImage x:Key="BlankImage" UriSource="pack://application:,,,/Resources/Person.jpg"/>
     </UserControl.Resources>
     <Grid>
         <Border BorderThickness="1,1,1,1" 
@@ -17,13 +18,13 @@
             <Border.Effect>
                 <DropShadowEffect/>
             </Border.Effect>
-            <Rectangle Fill="{StaticResource MahApps.Brushes.Accent4}"/>
+            <!--<Rectangle Fill="{StaticResource MahApps.Brushes.Accent4}"/>-->
         </Border>
         <StackPanel Orientation="Vertical" Margin="40">
             <Image Margin="4" 
                    Width="150" 
                    Height="150" 
-                   Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}}"/>
+                   Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}" />
             <TextBlock d:Text="Archie Cortez"  Text="{Binding Name, FallbackValue=NO NAME, TargetNullValue=NO NAME}" FontSize="32" HorizontalAlignment="Center" FontWeight="Bold"/>
             <TextBlock d:Text="+639213466856"  Text="{Binding PhoneNumber}" FontSize="20" HorizontalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
