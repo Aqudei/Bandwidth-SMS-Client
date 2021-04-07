@@ -1,0 +1,77 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
+             xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:converters="clr-namespace:Bandwidth_SMS_Client.Converters" x:Class="Bandwidth_SMS_Client.Views.MessagItemView"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:MessageTypeToAlignmentConverter x:Key="MessageTypeToAlignmentConverter"/>
+        <converters:MessageTypeToBrushConverter x:Key="MessageTypeToBrushConverter"/>
+    </UserControl.Resources>
+
+    <Grid Margin="16" 
+          Width="600" 
+          HorizontalAlignment="{Binding MessageType, Converter={StaticResource MessageTypeToAlignmentConverter}}">
+       
+        <Border Background="{Binding MessageType, Converter={StaticResource MessageTypeToBrushConverter}}"
+            Padding="15"
+            CornerRadius="30">
+
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left">
+                    <Run Text="From: "/>
+                    <Run Text=" "/>
+                    <Run Text="{Binding DisplayName, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock d:Text="01/01/2021 11:44"  Text="{Binding MessageDate}" Margin="1,0,0,0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                <!--Actions-->
+                <StackPanel Grid.Column="2" 
+                    Grid.Row="0" 
+                    Orientation="Horizontal" 
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right" 
+                    Margin="2">
+
+                    <Button HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center"
+                        CommandParameter="{Binding}"
+                        Command="{Binding DataContext.DeleteMessageCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}" Content="{ico:BootstrapIcons Trash}"/>
+                </StackPanel>
+
+                <!--End Action-->
+                <TextBlock TextWrapping="Wrap" 
+                    Grid.Column="0"
+                    FontSize="20"
+                    FontWeight="Medium"
+                    Text="{Binding Body}" 
+                    d:Text="This is the body of the message" 
+                    Grid.Row="1" Grid.ColumnSpan="3" 
+                    HorizontalAlignment="Left"
+                    Margin="10,0,0,0"/>
+            </Grid>
+        </Border>
+        <Border BorderThickness="0.5,0,0.5,0.5" 
+                BorderBrush="{StaticResource MahApps.Brushes.Accent4}" 
+                OpacityMask="#FF8D8D8D" CornerRadius="30,30,30,30">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="5" />
+            </Border.Effect>
+        </Border>
+    </Grid>
+</UserControl>
