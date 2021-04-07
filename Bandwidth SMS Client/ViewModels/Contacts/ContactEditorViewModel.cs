@@ -101,9 +101,20 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
                     var base64String = Convert.ToBase64String(await File.ReadAllBytesAsync(Avatar));
                     contact.Avatar = base64String;
                 }
+
+                //if (string.IsNullOrWhiteSpace(contact.Avatar))
+                //{
+                //    var base64String = Convert.ToBase64String(await File.ReadAllBytesAsync(Path.Combine("Resources", "Person.jpg")));
+                //    contact.Avatar = base64String;
+                //}
+
+                if (string.IsNullOrWhiteSpace(contact.Avatar))
+                {
+                    contact.Avatar = "";
+                }
                 contact = await _smsClient.SaveContactAsync(contact);
 
-               
+
 
                 _eventAggregator.GetEvent<ContactUpdated>().Publish(new ContactUpdatedPayload
                 {
