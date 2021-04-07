@@ -26,7 +26,7 @@
                    Height="150" 
                    Source="{Binding Avatar, Converter={StaticResource AvatarToImageConverter}, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}" />
             <TextBlock d:Text="Archie Cortez"  Text="{Binding Name, FallbackValue=NO NAME, TargetNullValue=NO NAME}" FontSize="32" HorizontalAlignment="Center" FontWeight="Bold"/>
-            <TextBlock d:Text="+639213466856"  Text="{Binding PhoneNumber}" FontSize="20" HorizontalAlignment="Center"/>
+            <TextBlock d:Text="+639213466856"  Text="{Binding FormattedPhone}" FontSize="20" HorizontalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button VerticalContentAlignment="Center" 
                     Command="{Binding DataContext.EditContactCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"

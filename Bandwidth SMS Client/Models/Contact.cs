@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using PhoneNumbers;
 using Prism.Mvvm;
 
 namespace Bandwidth_SMS_Client.Models
@@ -29,6 +31,25 @@ namespace Bandwidth_SMS_Client.Models
             set => SetProperty(ref _phoneNumber, value);
         }
 
+        public string FormattedPhone
+        {
+            get
+            {
+                var phoneUtil = PhoneNumberUtil.GetInstance();
+
+                try
+                {
+                    var parsed = phoneUtil.Parse(PhoneNumber, "US");
+                    return phoneUtil.Format(parsed, PhoneNumberFormat.INTERNATIONAL).Trim("+".ToCharArray()).Replace(" ", "-");
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                    return PhoneNumber;
+                }
+            }
+        }
+
         public DateTime DateCreated { get; set; }
         public int Id { get; set; }
 
@@ -44,7 +65,7 @@ namespace Bandwidth_SMS_Client.Models
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((Contact) obj);
+            return Equals((Contact)obj);
         }
 
         public override int GetHashCode()
