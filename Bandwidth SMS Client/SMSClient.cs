@@ -19,6 +19,7 @@ using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using PhoneNumbers;
 using Prism.Events;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -57,6 +58,7 @@ namespace Bandwidth_SMS_Client
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
         public event EventHandler<ContactUpdatedPayload> ContactUpdatedEvent;
+
         JsonSerializerSettings _serializerSetting = new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -268,9 +270,10 @@ namespace Bandwidth_SMS_Client
 
         public void SendMessage(string recipient, string body)
         {
+            var formatterPhone = FormatPhone(recipient);
             var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
             request.AddParameter("Body", body);
-            request.AddParameter("To", recipient);
+            request.AddParameter("To", formatterPhone);
             var response = RestClient.Execute<MessageItem>(request);
             if (response.StatusCode != HttpStatusCode.Created)
             {
@@ -278,6 +281,18 @@ namespace Bandwidth_SMS_Client
                 Debug.WriteLine(message);
                 throw new HttpRequestException(message);
             }
+        }
+
+        private string FormatPhone(string recipient)
+        {
+            var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+            var parsed = phoneNumberUtil.Parse(recipient, "US");
+            if (phoneNumberUtil.IsValidNumberForRegion(parsed, "US") && phoneNumberUtil.IsValidNumber(parsed))
+            {
+                return phoneNumberUtil.Format(parsed, PhoneNumberFormat.E164);
+            }
+
+            throw new Exception($"Failed to parse {recipient}");
         }
 
         public void DeleteMessage(in int messageId)

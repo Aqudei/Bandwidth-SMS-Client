@@ -1,4 +1,5 @@
 ﻿using System;
+using PhoneNumbers;
 using Prism.Mvvm;
 
 namespace Bandwidth_SMS_Client.Models
@@ -14,7 +15,15 @@ namespace Bandwidth_SMS_Client.Models
         public int Id { get; set; }
         public string DisplayName => string.IsNullOrEmpty(Name) ? "UNKNOWN" : Name;
 
-
+        public string FormattedPhone
+        {
+            get
+            {
+                var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+                var parsed = phoneNumberUtil.Parse(PhoneNumber, "US");
+                return phoneNumberUtil.Format(parsed, PhoneNumberFormat.INTERNATIONAL).Trim("+".ToCharArray()).Replace(" ", "-");
+            }
+        }
         public string Name
         {
             get => _name;

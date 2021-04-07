@@ -18,6 +18,9 @@ namespace Bandwidth_SMS_Client.Models
         public DateTime? MessageDate { get; set; }
         public string MessageBWID { get; set; }
         public string GroupingPhone => MessageType == "OUTGOING" ? To : From;
+
+
+
         public string DisplayName
         {
             get

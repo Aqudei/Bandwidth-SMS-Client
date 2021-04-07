@@ -17,7 +17,11 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
                 <Label Width="100" FontSize="18" VerticalAlignment="Center" VerticalContentAlignment="Center">Password:</Label>
-                <PasswordBox x:Name="PasswordBox" Width="300" PasswordChanged="PasswordBox_PasswordChanged_1" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                <PasswordBox x:Name="PasswordBox" Width="300" PasswordChanged="PasswordBox_PasswordChanged_1" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                    <PasswordBox.InputBindings>
+                        <KeyBinding Command="{Binding LoginCommand}" Key="Return"></KeyBinding>
+                    </PasswordBox.InputBindings>
+                </PasswordBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="2,2,2,2" HorizontalAlignment="Right">
                 <Button  Command="{Binding LoginCommand}" Width="100" Margin="10,2,10,2">Login</Button>

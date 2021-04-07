@@ -47,7 +47,7 @@
                 Grid.Column="1" d:Text="Juan dela Cruz (+636213466856)"
                 FontWeight="Bold"
                 FontSize="20"
-                Margin="2"><Run Text=" ("/><Run Text=" "/><Run Text="{Binding PhoneNumber}"/><Run Text=" "/><Run Text=")"/></TextBlock>
+                Margin="2"><Run Text=" ("/><Run Text=" "/><Run Text="{Binding FormattedPhone, Mode=OneWay}"/><Run Text=" "/><Run Text=")"/></TextBlock>
             <TextBlock Grid.Row="2" 
                 VerticalAlignment="Top"
                 Grid.Column="1" 
