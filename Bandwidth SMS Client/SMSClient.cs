@@ -270,10 +270,10 @@ namespace Bandwidth_SMS_Client
 
         public void SendMessage(string recipient, string body)
         {
-            var formatterPhone = FormatPhone(recipient);
+            var formattedPhone = FormatPhone(recipient);
             var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
             request.AddParameter("Body", body);
-            request.AddParameter("To", formatterPhone);
+            request.AddParameter("To", formattedPhone);
             var response = RestClient.Execute<MessageItem>(request);
             if (response.StatusCode != HttpStatusCode.Created)
             {
@@ -292,7 +292,7 @@ namespace Bandwidth_SMS_Client
                 return phoneNumberUtil.Format(parsed, PhoneNumberFormat.E164);
             }
 
-            throw new Exception($"Failed to parse {recipient}");
+            throw new Exception($"Phone number <{recipient}> is not valid ");
         }
 
         public void DeleteMessage(in int messageId)
