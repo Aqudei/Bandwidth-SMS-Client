@@ -37,6 +37,7 @@ namespace Bandwidth_SMS_Client.ViewModels
         private Conversation _selectedConversation;
 
         private readonly ObservableCollection<Conversation> _conversations = new ObservableCollection<Conversation>();
+        private DelegateCommand<Conversation> _deleteConversationCommand;
         public ICollectionView Conversations => CollectionViewSource.GetDefaultView(_conversations);
 
         public Conversation SelectedConversation
@@ -48,6 +49,21 @@ namespace Bandwidth_SMS_Client.ViewModels
         public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
 
         public DelegateCommand NewMessageCommand => _newMessageCommand ??= new DelegateCommand(DoNewMessage);
+
+        public DelegateCommand<Conversation> DeleteConversationCommand =>
+            _deleteConversationCommand ??= new DelegateCommand<Conversation>(DoDeleteConversation);
+
+        private async void DoDeleteConversation(Conversation conversation)
+        {
+            var result = await _dialogCoordinator.ShowMessageAsync(this, "SMSTrifecta",
+                $"Are you sure you want to delete conversation thread with {conversation.PhoneNumber}?", MessageDialogStyle.AffirmativeAndNegative);
+            if (result == MessageDialogResult.Negative)
+            {
+                return;
+            }
+
+            await _smsClient.DeleteConversationAsync(conversation);
+        }
 
         private void DoNewMessage()
         {

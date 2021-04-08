@@ -11,10 +11,17 @@ namespace Bandwidth_SMS_Client.Models
         private DateTime _updatedAt;
         private bool _hasNew;
         private string _name;
+        private int _messageCount;
         public string PhoneNumber { get; set; }
         public string OwnerPhone { get; set; }
         public int Id { get; set; }
         public string DisplayName => string.IsNullOrEmpty(Name) ? "UNKNOWN" : Name;
+
+        public int MessageCount
+        {
+            get => _messageCount;
+            set => SetProperty(ref _messageCount, value);
+        }
 
         public string FormattedPhone
         {

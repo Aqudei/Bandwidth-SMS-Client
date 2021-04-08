@@ -53,7 +53,7 @@ namespace Bandwidth_SMS_Client
         private string _token;
         //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
         //public RestClient RestClient = new RestClient("https://smstrifecta.ga");
-        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080");
+        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080") { PreAuthenticate = false };
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
@@ -315,7 +315,7 @@ namespace Bandwidth_SMS_Client
 
         public IEnumerable<Conversation> ListConversations()
         {
-            var request = new RestRequest($"/sms/conversations", Method.GET, DataFormat.Json);
+            var request = new RestRequest($"/sms/conversations/", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<Conversation>>(request);
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -324,7 +324,7 @@ namespace Bandwidth_SMS_Client
                 throw new HttpRequestException(message);
             }
 
-            return response.Data;
+            return response.Data.Where(c => c.MessageCount > 0);
         }
 
         public Task<IEnumerable<MessageItem>> ListMessagesAsync(int conversationId)
@@ -414,6 +414,24 @@ namespace Bandwidth_SMS_Client
             request.AddFile("Avatar", avatar, $"image/{ext.Trim(".".ToCharArray())}");
             var response = RestClient.Execute(request);
             if (response.StatusCode != HttpStatusCode.OK)
+            {
+                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+                Debug.WriteLine(message);
+                throw new HttpRequestException(message);
+            }
+        }
+
+        public async Task DeleteConversationAsync(Conversation conversation)
+        {
+            await Task.Run(() => DeleteConversation(conversation));
+        }
+
+        public void DeleteConversation(Conversation conversation)
+        {
+            var resource = $"/sms/conversations/{conversation.Id}/";
+            var request = new RestRequest(resource, Method.DELETE);
+            var response = RestClient.Execute(request);
+            if (response.StatusCode != HttpStatusCode.NoContent)
             {
                 var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
                 Debug.WriteLine(message);

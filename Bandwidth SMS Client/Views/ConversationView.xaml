@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:converters="clr-namespace:Bandwidth_SMS_Client.Converters"
              x:Class="Bandwidth_SMS_Client.Views.ConversationView"
              mc:Ignorable="d"
@@ -48,10 +49,19 @@
                 FontWeight="Bold"
                 FontSize="20"
                 Margin="2"><Run Text=" ("/><Run Text=" "/><Run Text="{Binding FormattedPhone, Mode=OneWay}"/><Run Text=" "/><Run Text=")"/></TextBlock>
-            <TextBlock Grid.Row="2" 
-                VerticalAlignment="Top"
-                Grid.Column="1" 
-                Text="{Binding UpdatedAt, StringFormat=\{0:g\}}"/>
+            <StackPanel Grid.Row="2" VerticalAlignment="Top"   Grid.Column="1" Orientation="Horizontal" >
+                <TextBlock 
+                    Text="{Binding UpdatedAt, StringFormat=\{0:g\}}"/>
+                <Button Padding="1" 
+                        Margin="10,0,10,0"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        CommandParameter="{Binding}" 
+                        Command="{Binding  DataContext.DeleteConversationCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}">
+                    <ico:FontAwesome Kind="TrashAltRegular" />
+                </Button>
+            </StackPanel>
+
             <Border Grid.Column="1" 
                 CornerRadius="20"
                 Visibility="{Binding HasNew, Converter={StaticResource BooleanToVisibilityConverter}}"
