@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,7 +63,15 @@ namespace Bandwidth_SMS_Client.ViewModels
                 return;
             }
 
-            await _smsClient.DeleteConversationAsync(conversation);
+            try
+            {
+                await _smsClient.DeleteConversationAsync(conversation);
+                _conversations.Remove(conversation);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"{e} | {e.Message}");
+            }
         }
 
         private void DoNewMessage()
