@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -13,6 +11,7 @@ using AutoMapper;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
 using MahApps.Metro.Controls.Dialogs;
+using Prism;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -21,84 +20,23 @@ using Prism.Services.Dialogs;
 
 namespace Bandwidth_SMS_Client.ViewModels
 {
-    class MessagingViewModel : BindableBase, INavigationAware
+    internal class MessagingViewModel : BindableBase, INavigationAware, IActiveAware
     {
-        private readonly IRegionManager _regionManager;
+        private readonly ObservableCollection<Conversation> _conversations = new ObservableCollection<Conversation>();
+        private readonly IDialogCoordinator _dialogCoordinator;
         private readonly IDialogService _dialogService;
-        private readonly SMSClient _smsClient;
+        private readonly Dispatcher _dispatcher;
         private readonly IEventAggregator _eventAggregator;
         private readonly IMapper _mapper;
-        private readonly IDialogCoordinator _dialogCoordinator;
-        private Message _selectedMessage;
-        private string _message;
-        private DelegateCommand _sendCommand;
-        private DelegateCommand _newMessageCommand;
-        private DelegateCommand<MessageItem> _deleteMessageCommand;
-        private readonly Dispatcher _dispatcher;
-        private Conversation _selectedConversation;
-
-        private readonly ObservableCollection<Conversation> _conversations = new ObservableCollection<Conversation>();
+        private readonly IRegionManager _regionManager;
+        private readonly SMSClient _smsClient;
         private DelegateCommand<Conversation> _deleteConversationCommand;
-        public ICollectionView Conversations => CollectionViewSource.GetDefaultView(_conversations);
-
-        public Conversation SelectedConversation
-        {
-            get => _selectedConversation;
-            set => SetProperty(ref _selectedConversation, value);
-        }
-
-        public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
-
-        public DelegateCommand NewMessageCommand => _newMessageCommand ??= new DelegateCommand(DoNewMessage);
-
-        public DelegateCommand<Conversation> DeleteConversationCommand =>
-            _deleteConversationCommand ??= new DelegateCommand<Conversation>(DoDeleteConversation);
-
-        private async void DoDeleteConversation(Conversation conversation)
-        {
-            var result = await _dialogCoordinator.ShowMessageAsync(this, "SMSTrifecta",
-                $"Are you sure you want to delete conversation thread with {conversation.PhoneNumber}?", MessageDialogStyle.AffirmativeAndNegative);
-            if (result == MessageDialogResult.Negative)
-            {
-                return;
-            }
-
-            try
-            {
-                await _smsClient.DeleteConversationAsync(conversation);
-                _conversations.Remove(conversation);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"{e} | {e.Message}");
-            }
-        }
-
-        private void DoNewMessage()
-        {
-            _dialogService.ShowDialog("SMSComposer");
-        }
-
-        public string Message
-        {
-            get => _message;
-            set => SetProperty(ref _message, value);
-        }
-
-        public Message SelectedMessage
-        {
-            get => _selectedMessage;
-            set => SetProperty(ref _selectedMessage, value);
-        }
-
-        public DelegateCommand SendCommand => _sendCommand ??=
-            new DelegateCommand(DoSend);
-
-        private async void DoSend()
-        {
-            await _smsClient.SendMessageAsync(SelectedConversation.PhoneNumber, Message);
-            Message = "";
-        }
+        private DelegateCommand<MessageItem> _deleteMessageCommand;
+        private string _message;
+        private DelegateCommand _newMessageCommand;
+        private Conversation _selectedConversation;
+        private Message _selectedMessage;
+        private DelegateCommand _sendCommand;
 
         public MessagingViewModel(IRegionManager regionManager, IDialogService dialogService,
             SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper, IDialogCoordinator dialogCoordinator)
@@ -133,6 +71,98 @@ namespace Bandwidth_SMS_Client.ViewModels
             PropertyChanged += MainWindowViewModel_PropertyChanged;
             _smsClient.MessageEvent += _smsClient_MessageEvent;
             _smsClient.ConversationEvent += _smsClient_ConversationEvent;
+            _smsClient.ContactUpdatedEvent += _smsClient_ContactUpdatedEvent;
+        }
+
+        public ICollectionView Conversations => CollectionViewSource.GetDefaultView(_conversations);
+
+        public Conversation SelectedConversation
+        {
+            get => _selectedConversation;
+            set => SetProperty(ref _selectedConversation, value);
+        }
+
+        public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
+
+        public DelegateCommand NewMessageCommand => _newMessageCommand ??= new DelegateCommand(DoNewMessage);
+
+        public DelegateCommand<Conversation> DeleteConversationCommand =>
+            _deleteConversationCommand ??= new DelegateCommand<Conversation>(DoDeleteConversation);
+
+        public string Message
+        {
+            get => _message;
+            set => SetProperty(ref _message, value);
+        }
+
+        public Message SelectedMessage
+        {
+            get => _selectedMessage;
+            set => SetProperty(ref _selectedMessage, value);
+        }
+
+        public DelegateCommand SendCommand => _sendCommand ??=
+            new DelegateCommand(DoSend);
+
+        public DelegateCommand<MessageItem> DeleteMessageCommand =>
+            _deleteMessageCommand ??= new DelegateCommand<MessageItem>(DoDeleteMessage);
+
+        public bool IsActive { get; set; }
+        public event EventHandler IsActiveChanged;
+
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+        }
+
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            return true;
+        }
+
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+        }
+
+        private async void DoDeleteConversation(Conversation conversation)
+        {
+            var result = await _dialogCoordinator.ShowMessageAsync(this, "SMSTrifecta",
+                $"Are you sure you want to delete conversation thread with {conversation.PhoneNumber}?",
+                MessageDialogStyle.AffirmativeAndNegative);
+            if (result == MessageDialogResult.Negative) return;
+
+            try
+            {
+                await _smsClient.DeleteConversationAsync(conversation);
+                _conversations.Remove(conversation);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"{e} | {e.Message}");
+            }
+        }
+
+        private void DoNewMessage()
+        {
+            _dialogService.ShowDialog("SMSComposer");
+        }
+
+        private async void DoSend()
+        {
+            await _smsClient.SendMessageAsync(SelectedConversation.PhoneNumber, Message);
+            Message = "";
+        }
+
+        private void _smsClient_ContactUpdatedEvent(object sender, ContactUpdatedPayload e)
+        {
+            _dispatcher.Invoke(() =>
+            {
+                if (e.UpdateType == ContactUpdatedPayload.UpdateTypes.Created ||
+                    e.UpdateType == ContactUpdatedPayload.UpdateTypes.Updated)
+                {
+                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == e.Contact.PhoneNumber);
+                    if (conversation != null) conversation.Name = e.Contact.Name;
+                }
+            });
         }
 
         private void _smsClient_ConversationEvent(object sender, ConversationEventPayload e)
@@ -140,21 +170,18 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case ConversationEventPayload.ConversationEventType.Updated:
-                    {
-                        var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
-                        if (conversation != null)
-                        {
-                            _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
-                        }
+                {
+                    var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
+                    if (conversation != null) _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
 
-                        break;
-                    }
+                    break;
+                }
                 case ConversationEventPayload.ConversationEventType.Created:
-                    {
-                        if (!Conversations.Contains(e.ConversationItem))
-                            _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
-                        break;
-                    }
+                {
+                    if (!Conversations.Contains(e.ConversationItem))
+                        _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
+                    break;
+                }
             }
         }
 
@@ -163,37 +190,31 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case MessageEventPayload.MessageEventType.Created:
-                    {
-                        var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                {
+                    var conversationNumber =
+                        e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
+                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                        if (conversation != null)
-                        {
-                            _dispatcher.Invoke(() => conversation.HasNew = true);
-                        }
+                    if (conversation != null) _dispatcher.Invoke(() => conversation.HasNew = true);
 
-                        if (conversation != null && SelectedConversation != null && SelectedConversation.Equals(conversation))
-                        {
-                            _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
-                        }
-
-                    }
+                    if (conversation != null && SelectedConversation != null &&
+                        SelectedConversation.Equals(conversation))
+                        _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
+                }
                     break;
                 case MessageEventPayload.MessageEventType.Deleted:
-                    {
-                        var conversationNumber = e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                {
+                    var conversationNumber =
+                        e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
+                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                        if (conversation != null && SelectedConversation != null && SelectedConversation.Equals(conversation))
-                        {
-                            _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
-                        }
-                    }
+                    if (conversation != null && SelectedConversation != null &&
+                        SelectedConversation.Equals(conversation))
+                        _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
+                }
                     break;
             }
         }
-
-        public DelegateCommand<MessageItem> DeleteMessageCommand => _deleteMessageCommand ??= new DelegateCommand<MessageItem>(DoDeleteMessage);
 
         private void DoDeleteMessage(MessageItem message)
         {
@@ -208,7 +229,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             }
         }
 
-        private void MainWindowViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(SelectedConversation) && SelectedConversation != null)
             {
@@ -225,22 +246,7 @@ namespace Bandwidth_SMS_Client.ViewModels
                         await progress.CloseAsync();
                     });
                 });
-
             }
-        }
-
-        public void OnNavigatedTo(NavigationContext navigationContext)
-        {
-
-        }
-
-        public bool IsNavigationTarget(NavigationContext navigationContext)
-        {
-            return true;
-        }
-
-        public void OnNavigatedFrom(NavigationContext navigationContext)
-        {
         }
     }
 }

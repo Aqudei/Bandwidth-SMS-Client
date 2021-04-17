@@ -43,7 +43,7 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
 
         private void DoNewContact()
         {
-            _regionManager.RequestNavigate("ActionRegion", "ContactEditor");
+            _regionManager.RequestNavigate(RegionNames.ActionRegion, "ContactEditor");
         }
 
 

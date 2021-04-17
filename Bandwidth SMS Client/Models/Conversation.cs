@@ -43,7 +43,11 @@ namespace Bandwidth_SMS_Client.Models
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, value);
+            set
+            {
+                SetProperty(ref _name, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
         }
 
         public string Avatar

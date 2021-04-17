@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
@@ -12,7 +13,7 @@
     <Grid>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
-                <Label Width="100" FontSize="18" VerticalAlignment="Center" VerticalContentAlignment="Center">Username:</Label>
+                <Label Content="Username:" Width="100" FontSize="18" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Text="{Binding Username}"  Width="300" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
