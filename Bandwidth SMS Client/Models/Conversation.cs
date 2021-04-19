@@ -16,6 +16,7 @@ namespace Bandwidth_SMS_Client.Models
         public string OwnerPhone { get; set; }
         public int Id { get; set; }
         public string DisplayName => string.IsNullOrEmpty(Name) ? "UNKNOWN" : Name;
+        public Contact Contact { get; set; }
 
         public int MessageCount
         {

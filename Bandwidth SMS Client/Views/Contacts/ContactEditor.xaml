@@ -8,9 +8,11 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
+             xmlns:converters="clr-namespace:Bandwidth_SMS_Client.Converters"
              mc:Ignorable="d" >
     <UserControl.Resources>
         <BitmapImage x:Key="BlankImage" UriSource="pack://application:,,,/Resources/Person.jpg"/>
+        <converters:AvatarToImageConverter x:Key="AvatarToImageConverter"/>
     </UserControl.Resources>
     <GroupBox Header="Contact EDITOR" Margin="20">
         <Grid>
@@ -18,7 +20,7 @@
                 <StackPanel VerticalAlignment="Top" 
                             Orientation="Vertical">
                     <Image Width="200"
-                           Source="{Binding Avatar, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}"
+                           Source="{Binding Avatar,Converter={StaticResource AvatarToImageConverter}, FallbackValue={StaticResource BlankImage}, TargetNullValue={StaticResource BlankImage}}"
                            Height="200" Margin="0,20,0,0"/>
                     <Button Command="{Binding BrowseAvatarCommand}" 
                             HorizontalAlignment="Center" 

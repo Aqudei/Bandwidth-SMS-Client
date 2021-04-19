@@ -7,23 +7,17 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.Intrinsics.X86;
 using System.Security.Authentication;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Resources;
-using System.Windows.Threading;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
+using Bandwidth_SMS_Client.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PhoneNumbers;
-using Prism.Events;
 using RestSharp;
 using RestSharp.Authenticators;
-using RestSharp.Serialization;
 
 namespace Bandwidth_SMS_Client
 {
@@ -51,15 +45,16 @@ namespace Bandwidth_SMS_Client
     public class SMSClient
     {
         private string _token;
+
         //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
-        //public RestClient RestClient = new RestClient("https://smstrifecta.ga");
-        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080") { PreAuthenticate = false };
+        //public RestClient RestClient = new RestClient("https://smstrifecta.ga") { PreAuthenticate = false };
+        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080") {PreAuthenticate = false};
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
         public event EventHandler<ContactUpdatedPayload> ContactUpdatedEvent;
 
-        JsonSerializerSettings _serializerSetting = new JsonSerializerSettings
+        private JsonSerializerSettings _serializerSetting = new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             NullValueHandling = NullValueHandling.Ignore,
@@ -73,14 +68,15 @@ namespace Bandwidth_SMS_Client
             _worker.WorkerReportsProgress = true;
 
             RestClient.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-
         }
 
         private DateTime ReadLastPull()
         {
             try
             {
-                return Properties.Settings.Default.LastPull == new DateTime(1753, 1, 1) ? DateTime.UtcNow : Properties.Settings.Default.LastPull;
+                return Settings.Default.LastPull == new DateTime(1753, 1, 1)
+                    ? DateTime.UtcNow
+                    : Settings.Default.LastPull;
             }
             catch
             {
@@ -95,7 +91,8 @@ namespace Bandwidth_SMS_Client
             while (true)
             {
                 Thread.Sleep(4000);
-                var request = new RestRequest($"/sms/pushes/{since.ToString("s", CultureInfo.InvariantCulture)}", Method.GET, DataFormat.Json);
+                var request = new RestRequest($"/sms/pushes/{since.ToString("s", CultureInfo.InvariantCulture)}",
+                    Method.GET, DataFormat.Json);
                 var response = RestClient.Execute<IEnumerable<Push>>(request);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
@@ -115,7 +112,6 @@ namespace Bandwidth_SMS_Client
                 SaveLastPull(since);
 
                 foreach (var push in response.Data)
-                {
                     switch (push.Name)
                     {
                         case "message-created":
@@ -192,9 +188,7 @@ namespace Bandwidth_SMS_Client
                                 ContactUpdatedEvent?.Invoke(this, payload);
                                 break;
                             }
-
                     }
-                }
             }
         }
 
@@ -213,8 +207,8 @@ namespace Bandwidth_SMS_Client
 
         private static void SaveLastPull(DateTime since)
         {
-            Properties.Settings.Default.LastPull = since;
-            Properties.Settings.Default.Save();
+            Settings.Default.LastPull = since;
+            Settings.Default.Save();
         }
 
         public Task LoginAsync(string username, string password)
@@ -228,10 +222,7 @@ namespace Bandwidth_SMS_Client
             request.AddParameter("username", username);
             request.AddParameter("password", password);
             var response = RestClient.Execute<TokenResponse>(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new AuthenticationException();
-            }
+            if (response.StatusCode != HttpStatusCode.OK) throw new AuthenticationException();
 
             _token = response.Data.Token;
             RestClient.Authenticator = new MyTokenAuthenticator(_token);
@@ -247,13 +238,11 @@ namespace Bandwidth_SMS_Client
         {
             var request = new RestRequest("/sms/messages", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<MessageItem>>(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new HttpRequestException();
-            }
+            if (response.StatusCode != HttpStatusCode.OK) throw new HttpRequestException();
 
             var query = from a in response.Data
-                        group a by a.GroupingPhone into g
+                        group a by a.GroupingPhone
+                into g
                         select new MessageThread
                         {
                             Recipient = g.Key,
@@ -285,12 +274,10 @@ namespace Bandwidth_SMS_Client
 
         private string FormatPhone(string recipient)
         {
-            var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+            var phoneNumberUtil = PhoneNumberUtil.GetInstance();
             var parsed = phoneNumberUtil.Parse(recipient, "US");
             if (phoneNumberUtil.IsValidNumberForRegion(parsed, "US") && phoneNumberUtil.IsValidNumber(parsed))
-            {
                 return phoneNumberUtil.Format(parsed, PhoneNumberFormat.E164);
-            }
 
             throw new Exception($"Phone number <{recipient}> is not valid ");
         }
@@ -315,7 +302,7 @@ namespace Bandwidth_SMS_Client
 
         public IEnumerable<Conversation> ListConversations()
         {
-            var request = new RestRequest($"/sms/conversations/", Method.GET, DataFormat.Json);
+            var request = new RestRequest("/sms/conversations/", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<Conversation>>(request);
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -337,9 +324,7 @@ namespace Bandwidth_SMS_Client
             var request = new RestRequest($"/sms/messages/{conversationId}", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<MessageItem>>(request);
             if (response.StatusCode != HttpStatusCode.OK)
-            {
                 throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
-            }
 
             return response.Data;
         }
@@ -354,9 +339,7 @@ namespace Bandwidth_SMS_Client
             var request = new RestRequest("/sms/contacts/", Method.GET, DataFormat.Json);
             var response = RestClient.Execute<IEnumerable<Contact>>(request);
             if (response.StatusCode != HttpStatusCode.OK)
-            {
                 throw new HttpRequestException($"{response.ErrorMessage} / {response.ErrorException?.Message}");
-            }
 
             return response.Data;
         }
@@ -368,7 +351,7 @@ namespace Bandwidth_SMS_Client
 
         public Contact SaveContact(Contact contact)
         {
-            var resource = contact.Id == 0 ? $"/sms/contacts/" : $"/sms/contacts/{contact.Id}/";
+            var resource = contact.Id == 0 ? "/sms/contacts/" : $"/sms/contacts/{contact.Id}/";
             var method = contact.Id == 0 ? Method.POST : Method.PATCH;
             var request = new RestRequest(resource, method, DataFormat.Json);
             request.AddJsonBody(contact);
@@ -439,6 +422,4 @@ namespace Bandwidth_SMS_Client
             }
         }
     }
-
-
 }

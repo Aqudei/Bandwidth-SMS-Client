@@ -30,16 +30,14 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
         public DelegateCommand BrowseAvatarCommand => _browseAvatarCommand ??= new DelegateCommand(DoBrowseAvatar);
         private bool _isAvatarDirty = false;
 
-        private void DoBrowseAvatar()
+        private async void DoBrowseAvatar()
         {
-            var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog
-            {
-
-            };
+            var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
             var result = dialog.ShowDialog();
             if (result == CommonFileDialogResult.Ok)
             {
-                Avatar = dialog.FileName;
+                var base64String = Convert.ToBase64String(await File.ReadAllBytesAsync(dialog.FileName));
+                Avatar = base64String;
                 _isAvatarDirty = true;
             }
         }
@@ -96,11 +94,11 @@ namespace Bandwidth_SMS_Client.ViewModels.Contacts
                 var updateType = contact.Id == 0
                     ? ContactUpdatedPayload.UpdateTypes.Created
                     : ContactUpdatedPayload.UpdateTypes.Updated;
-                if (_isAvatarDirty)
-                {
-                    var base64String = Convert.ToBase64String(await File.ReadAllBytesAsync(Avatar));
-                    contact.Avatar = base64String;
-                }
+                //if (_isAvatarDirty)
+                //{
+                //    var base64String = Convert.ToBase64String(await File.ReadAllBytesAsync(Avatar));
+                //    contact.Avatar = base64String;
+                //}
 
                 //if (string.IsNullOrWhiteSpace(contact.Avatar))
                 //{

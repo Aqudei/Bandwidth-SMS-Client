@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using PhoneNumbers;
 using Prism.Mvvm;
 
@@ -9,9 +7,11 @@ namespace Bandwidth_SMS_Client.Models
 {
     public class Contact : BindableBase, IEquatable<Contact>
     {
-        private string _name;
         private string _avatar;
+        private string _name;
         private string _phoneNumber;
+
+        public bool Added { get; set; }
 
         public string Name
         {
@@ -40,7 +40,8 @@ namespace Bandwidth_SMS_Client.Models
                 try
                 {
                     var parsed = phoneUtil.Parse(PhoneNumber, "US");
-                    return phoneUtil.Format(parsed, PhoneNumberFormat.INTERNATIONAL).Trim("+".ToCharArray()).Replace(" ", "-");
+                    return phoneUtil.Format(parsed, PhoneNumberFormat.INTERNATIONAL).Trim("+".ToCharArray())
+                        .Replace(" ", "-");
                 }
                 catch (Exception e)
                 {
@@ -64,8 +65,8 @@ namespace Bandwidth_SMS_Client.Models
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Contact)obj);
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Contact) obj);
         }
 
         public override int GetHashCode()

@@ -53,12 +53,20 @@
                 <TextBlock 
                     Text="{Binding UpdatedAt, StringFormat=\{0:g\}}"/>
                 <Button Padding="1" 
-                        Margin="10,0,10,0"
+                        Margin="5,0,5,0"
                         HorizontalAlignment="Center" 
                         VerticalAlignment="Center" 
                         CommandParameter="{Binding}" 
                         Command="{Binding  DataContext.DeleteConversationCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}">
                     <ico:FontAwesome Kind="TrashAltRegular" />
+                </Button>
+                <Button Padding="1" 
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        CommandParameter="{Binding}" 
+                        Command="{Binding  DataContext.AddToContactsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}">
+                    <ico:FontAwesome Kind="AddressCardRegular" />
                 </Button>
             </StackPanel>
 
