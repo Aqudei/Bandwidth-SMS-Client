@@ -48,7 +48,7 @@ namespace Bandwidth_SMS_Client
 
         //public RestClient RestClient = new RestClient("http://127.0.0.1:8000");
         //public RestClient RestClient = new RestClient("https://smstrifecta.ga") { PreAuthenticate = false };
-        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080") {PreAuthenticate = false};
+        public RestClient RestClient = new RestClient("http://sms.tripbx.com:8080") { PreAuthenticate = false };
         private readonly BackgroundWorker _worker;
         public event EventHandler<MessageEventPayload> MessageEvent;
         public event EventHandler<ConversationEventPayload> ConversationEvent;
@@ -252,17 +252,29 @@ namespace Bandwidth_SMS_Client
             return query.AsEnumerable();
         }
 
-        public Task SendMessageAsync(string recipient, string body)
+
+        public Task SendMessageAsync(string recipient, string body, string attachment = null)
         {
-            return Task.Run(() => SendMessage(recipient, body));
+            return Task.Run(() => SendMessage(recipient, body, attachment));
         }
 
-        public void SendMessage(string recipient, string body)
+        
+
+        public void SendMessage(string recipient, string body, string attachment = null)
         {
+            //if (!string.IsNullOrWhiteSpace(attachment))
+            //{
+            //    var filename = Path.GetFileName(attachment);
+            //    request.AddFile("File", attachment);
+            //    request.AddHeader("Content-Disposition", $"attachment; filename={filename}");
+            //}
+
             var formattedPhone = FormatPhone(recipient);
             var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
             request.AddParameter("Body", body);
             request.AddParameter("To", formattedPhone);
+
+
             var response = RestClient.Execute<MessageItem>(request);
             if (response.StatusCode != HttpStatusCode.Created)
             {

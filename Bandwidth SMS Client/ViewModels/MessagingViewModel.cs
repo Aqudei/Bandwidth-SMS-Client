@@ -11,6 +11,7 @@ using AutoMapper;
 using Bandwidth_SMS_Client.Events;
 using Bandwidth_SMS_Client.Models;
 using MahApps.Metro.Controls.Dialogs;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using Prism;
 using Prism.Commands;
 using Prism.Events;
@@ -30,15 +31,18 @@ namespace Bandwidth_SMS_Client.ViewModels
         private readonly IMapper _mapper;
         private readonly IRegionManager _regionManager;
         private readonly SMSClient _smsClient;
+
+        private DelegateCommand<Conversation> _addToContactsCommand;
+        private DelegateCommand _attachMediaCommand;
+        private string _attachment;
         private DelegateCommand<Conversation> _deleteConversationCommand;
         private DelegateCommand<MessageItem> _deleteMessageCommand;
         private string _message;
         private DelegateCommand _newMessageCommand;
+        private DelegateCommand _removeMediaCommand;
         private Conversation _selectedConversation;
         private Message _selectedMessage;
         private DelegateCommand _sendCommand;
-
-        private DelegateCommand<Conversation> _addToContactsCommand;
 
         public MessagingViewModel(IRegionManager regionManager, IDialogService dialogService,
             SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper, IDialogCoordinator dialogCoordinator)
@@ -109,6 +113,19 @@ namespace Bandwidth_SMS_Client.ViewModels
         public DelegateCommand<MessageItem> DeleteMessageCommand =>
             _deleteMessageCommand ??= new DelegateCommand<MessageItem>(DoDeleteMessage);
 
+        public DelegateCommand<Conversation> AddToContactsCommand =>
+            _addToContactsCommand ??= new DelegateCommand<Conversation>(DoAddToContacts);
+
+        public DelegateCommand AddMediaCommand => _attachMediaCommand ??= new DelegateCommand(DoAttachMediaCommand);
+        public DelegateCommand RemoveMediaCommand => _removeMediaCommand ??= new DelegateCommand(() => Attachment = "");
+
+
+        public string Attachment
+        {
+            get => _attachment;
+            set => SetProperty(ref _attachment, value);
+        }
+
         public bool IsActive { get; set; }
         public event EventHandler IsActiveChanged;
 
@@ -122,7 +139,8 @@ namespace Bandwidth_SMS_Client.ViewModels
         }
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
-        { }
+        {
+        }
 
         private async void DoDeleteConversation(Conversation conversation)
         {
@@ -171,18 +189,18 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case ConversationEventPayload.ConversationEventType.Updated:
-                    {
-                        var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
-                        if (conversation != null) _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
+                {
+                    var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
+                    if (conversation != null) _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
 
-                        break;
-                    }
+                    break;
+                }
                 case ConversationEventPayload.ConversationEventType.Created:
-                    {
-                        if (!Conversations.Contains(e.ConversationItem))
-                            _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
-                        break;
-                    }
+                {
+                    if (!Conversations.Contains(e.ConversationItem))
+                        _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
+                    break;
+                }
             }
         }
 
@@ -191,28 +209,28 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case MessageEventPayload.MessageEventType.Created:
-                    {
-                        var conversationNumber =
-                            e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                {
+                    var conversationNumber =
+                        e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
+                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                        if (conversation != null) _dispatcher.Invoke(() => conversation.HasNew = true);
+                    if (conversation != null) _dispatcher.Invoke(() => conversation.HasNew = true);
 
-                        if (conversation != null && SelectedConversation != null &&
-                            SelectedConversation.Equals(conversation))
-                            _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
-                    }
+                    if (conversation != null && SelectedConversation != null &&
+                        SelectedConversation.Equals(conversation))
+                        _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
+                }
                     break;
                 case MessageEventPayload.MessageEventType.Deleted:
-                    {
-                        var conversationNumber =
-                            e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                {
+                    var conversationNumber =
+                        e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
+                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                        if (conversation != null && SelectedConversation != null &&
-                            SelectedConversation.Equals(conversation))
-                            _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
-                    }
+                    if (conversation != null && SelectedConversation != null &&
+                        SelectedConversation.Equals(conversation))
+                        _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
+                }
                     break;
             }
         }
@@ -230,18 +248,20 @@ namespace Bandwidth_SMS_Client.ViewModels
             }
         }
 
-        public DelegateCommand<Conversation> AddToContactsCommand =>
-            _addToContactsCommand ??= new DelegateCommand<Conversation>(DoAddToContacts);
-
         private void DoAddToContacts(Conversation conversation)
         {
             if (conversation.Contact == null)
             {
-                var parameters = new NavigationParameters { { "contact", new Contact
+                var parameters = new NavigationParameters
                 {
-                    Added = true,
-                    PhoneNumber =  conversation.PhoneNumber
-                } } };
+                    {
+                        "contact", new Contact
+                        {
+                            Added = true,
+                            PhoneNumber = conversation.PhoneNumber
+                        }
+                    }
+                };
 
                 _regionManager.RequestNavigate(RegionNames.ActionRegion, "ContactEditor", parameters);
             }
@@ -250,9 +270,19 @@ namespace Bandwidth_SMS_Client.ViewModels
                 // Modify
                 // var navigationParameters = new NavigationParameters { { "contact", contact } };
                 conversation.Contact.Added = true;
-                var parameters = new NavigationParameters { { "contact", conversation.Contact } };
+                var parameters = new NavigationParameters {{"contact", conversation.Contact}};
                 _regionManager.RequestNavigate(RegionNames.ActionRegion, "ContactEditor", parameters);
             }
+        }
+
+        private void DoAttachMediaCommand()
+        {
+            var dialog = new CommonOpenFileDialog
+            {
+                Multiselect = false
+            };
+            var result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok) Attachment = dialog.FileName;
         }
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)

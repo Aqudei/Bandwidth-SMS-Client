@@ -33,6 +33,10 @@
 
 
         <Grid DockPanel.Dock="Bottom">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
@@ -40,10 +44,12 @@
 
             <TextBox Text="{Binding Message}" MinLines="4" Margin="8"/>
 
-            <StackPanel Orientation="Vertical" Grid.Column="1">
-                <Button Command="{Binding SendCommand}" Margin="8" Width="85">Send</Button>
+            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+                <Button Command="{Binding SendCommand}" Margin="8,2,8,2" Width="85">Send</Button>
+                <Button Command="{Binding AttachMediaCommand}" Margin="8,2,8,2" Width="85">Add Media</Button>
+                <Button Command="{Binding RemoveMediaCommand}" Width="85" Content="Remove Media"/>
             </StackPanel>
-
+            <TextBlock Text="{Binding Attachment}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
         </Grid>
         <GroupBox Header="Messages" DockPanel.Dock="Right" Margin="8">
             <ScrollViewer >
