@@ -167,8 +167,16 @@ namespace Bandwidth_SMS_Client.ViewModels
 
         private async void DoSend()
         {
-            await _smsClient.SendMessageAsync(SelectedConversation.PhoneNumber, Message);
+            if (!string.IsNullOrWhiteSpace(Attachment))
+            {
+                await _smsClient.SendMessageAsync(SelectedConversation.PhoneNumber, Message, Attachment);
+            }
+            else
+            {
+                await _smsClient.SendMessageAsync(SelectedConversation.PhoneNumber, Message);
+            }
             Message = "";
+            Attachment = "";
         }
 
         private void _smsClient_ContactUpdatedEvent(object sender, ContactUpdatedPayload e)
@@ -189,18 +197,18 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case ConversationEventPayload.ConversationEventType.Updated:
-                {
-                    var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
-                    if (conversation != null) _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
+                    {
+                        var conversation = _conversations.FirstOrDefault(c => c.Id == e.ConversationItem.Id);
+                        if (conversation != null) _dispatcher.Invoke(() => _mapper.Map(e.ConversationItem, conversation));
 
-                    break;
-                }
+                        break;
+                    }
                 case ConversationEventPayload.ConversationEventType.Created:
-                {
-                    if (!Conversations.Contains(e.ConversationItem))
-                        _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
-                    break;
-                }
+                    {
+                        if (!Conversations.Contains(e.ConversationItem))
+                            _dispatcher.Invoke(() => _conversations.Add(e.ConversationItem));
+                        break;
+                    }
             }
         }
 
@@ -209,28 +217,28 @@ namespace Bandwidth_SMS_Client.ViewModels
             switch (e.EventType)
             {
                 case MessageEventPayload.MessageEventType.Created:
-                {
-                    var conversationNumber =
-                        e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                    {
+                        var conversationNumber =
+                            e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
+                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                    if (conversation != null) _dispatcher.Invoke(() => conversation.HasNew = true);
+                        if (conversation != null) _dispatcher.Invoke(() => conversation.HasNew = true);
 
-                    if (conversation != null && SelectedConversation != null &&
-                        SelectedConversation.Equals(conversation))
-                        _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
-                }
+                        if (conversation != null && SelectedConversation != null &&
+                            SelectedConversation.Equals(conversation))
+                            _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
+                    }
                     break;
                 case MessageEventPayload.MessageEventType.Deleted:
-                {
-                    var conversationNumber =
-                        e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
-                    var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
+                    {
+                        var conversationNumber =
+                            e.MessageItem.MessageType == "INCOMING" ? e.MessageItem.From : e.MessageItem.To;
+                        var conversation = _conversations.FirstOrDefault(c => c.PhoneNumber == conversationNumber);
 
-                    if (conversation != null && SelectedConversation != null &&
-                        SelectedConversation.Equals(conversation))
-                        _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
-                }
+                        if (conversation != null && SelectedConversation != null &&
+                            SelectedConversation.Equals(conversation))
+                            _dispatcher.Invoke(() => Messages.Remove(e.MessageItem));
+                    }
                     break;
             }
         }
@@ -270,7 +278,7 @@ namespace Bandwidth_SMS_Client.ViewModels
                 // Modify
                 // var navigationParameters = new NavigationParameters { { "contact", contact } };
                 conversation.Contact.Added = true;
-                var parameters = new NavigationParameters {{"contact", conversation.Contact}};
+                var parameters = new NavigationParameters { { "contact", conversation.Contact } };
                 _regionManager.RequestNavigate(RegionNames.ActionRegion, "ContactEditor", parameters);
             }
         }

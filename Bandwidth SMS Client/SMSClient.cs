@@ -253,14 +253,17 @@ namespace Bandwidth_SMS_Client
         }
 
 
-        public Task SendMessageAsync(string recipient, string body, string attachment = null)
+        public Task SendMessageAsync(string recipient, string body)
+        {
+            return Task.Run(() => SendMessage(recipient, body));
+        }
+
+        public Task SendMessageAsync(string recipient, string body, string attachment)
         {
             return Task.Run(() => SendMessage(recipient, body, attachment));
         }
 
-        
-
-        public void SendMessage(string recipient, string body, string attachment = null)
+        public MessageItem SendMessage(string recipient, string body)
         {
             //if (!string.IsNullOrWhiteSpace(attachment))
             //{
@@ -270,19 +273,50 @@ namespace Bandwidth_SMS_Client
             //}
 
             var formattedPhone = FormatPhone(recipient);
-            var request = new RestRequest("/sms/messages/", Method.POST, DataFormat.Json);
+            var request = new RestRequest("/sms/messages/", Method.POST);
             request.AddParameter("Body", body);
             request.AddParameter("To", formattedPhone);
 
+            var response = RestClient.Execute<MessageItem>(request);
+            if (response.StatusCode == HttpStatusCode.Created)
+                return response.Data;
+
+            var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+            Debug.WriteLine(message);
+            throw new HttpRequestException(message);
+        }
+
+
+        public MessageItem SendMessage(string recipient, string body, string fileName)
+        {
+            //if (!string.IsNullOrWhiteSpace(attachment))
+            //{
+            //    var filename = Path.GetFileName(attachment);
+            //    request.AddFile("File", attachment);
+            //    request.AddHeader("Content-Disposition", $"attachment; filename={filename}");
+            //}
+
+            var attachment = Convert.ToBase64String(File.ReadAllBytes(fileName));
+
+
+            var formattedPhone = FormatPhone(recipient);
+            var request = new RestRequest("/sms/messages/", Method.POST);
+            request.AddParameter("Body", body);
+            request.AddParameter("To", formattedPhone);
+            request.AddParameter("Attachment", attachment);
+            request.AddHeader("Content-Disposition", $"attachment; filename={fileName}");
+
 
             var response = RestClient.Execute<MessageItem>(request);
-            if (response.StatusCode != HttpStatusCode.Created)
-            {
-                var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
-                Debug.WriteLine(message);
-                throw new HttpRequestException(message);
-            }
+            if (response.StatusCode == HttpStatusCode.Created)
+                return response.Data;
+
+            var message = $"{response.ErrorMessage} | {response.ErrorException?.Message} | {response.Content}";
+            Debug.WriteLine(message);
+            throw new HttpRequestException(message);
+
         }
+
 
         private string FormatPhone(string recipient)
         {

@@ -9,8 +9,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mah:DialogParticipation.Register="{Binding}"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d" Height="445" Width="995">
     <DockPanel Margin="8" prism:RegionManager.RegionContext="{Binding Messages}">
         <Grid>
             <Grid.RowDefinitions>
@@ -38,15 +37,15 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
             <TextBox Text="{Binding Message}" MinLines="4" Margin="8"/>
 
             <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
                 <Button Command="{Binding SendCommand}" Margin="8,2,8,2" Width="85">Send</Button>
-                <Button Command="{Binding AttachMediaCommand}" Margin="8,2,8,2" Width="85">Add Media</Button>
+                <Button Command="{Binding AddMediaCommand}" Margin="8,2,8,2" Width="85">Add Media</Button>
                 <Button Command="{Binding RemoveMediaCommand}" Width="85" Content="Remove Media"/>
             </StackPanel>
             <TextBlock Text="{Binding Attachment}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
