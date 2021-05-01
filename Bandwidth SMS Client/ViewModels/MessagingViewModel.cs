@@ -44,6 +44,8 @@ namespace Bandwidth_SMS_Client.ViewModels
         private Message _selectedMessage;
         private DelegateCommand _sendCommand;
 
+
+
         public MessagingViewModel(IRegionManager regionManager, IDialogService dialogService,
             SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper, IDialogCoordinator dialogCoordinator)
         {
@@ -108,7 +110,9 @@ namespace Bandwidth_SMS_Client.ViewModels
         }
 
         public DelegateCommand SendCommand => _sendCommand ??=
-            new DelegateCommand(DoSend);
+            new DelegateCommand(DoSend, () => !string.IsNullOrWhiteSpace(Message) || !string.IsNullOrWhiteSpace(Attachment))
+                .ObservesProperty(() => Message)
+                .ObservesProperty(() => Attachment);
 
         public DelegateCommand<MessageItem> DeleteMessageCommand =>
             _deleteMessageCommand ??= new DelegateCommand<MessageItem>(DoDeleteMessage);
@@ -116,8 +120,11 @@ namespace Bandwidth_SMS_Client.ViewModels
         public DelegateCommand<Conversation> AddToContactsCommand =>
             _addToContactsCommand ??= new DelegateCommand<Conversation>(DoAddToContacts);
 
-        public DelegateCommand AddMediaCommand => _attachMediaCommand ??= new DelegateCommand(DoAttachMediaCommand);
-        public DelegateCommand RemoveMediaCommand => _removeMediaCommand ??= new DelegateCommand(() => Attachment = "");
+        public DelegateCommand AddMediaCommand => _attachMediaCommand ??= new DelegateCommand(DoAttachMediaCommand, () => string.IsNullOrWhiteSpace(Attachment))
+            .ObservesProperty(() => Attachment);
+
+        public DelegateCommand RemoveMediaCommand => _removeMediaCommand ??= new DelegateCommand(() => Attachment = "", () => !string.IsNullOrWhiteSpace(Attachment))
+            .ObservesProperty(()=>Attachment);
 
 
         public string Attachment

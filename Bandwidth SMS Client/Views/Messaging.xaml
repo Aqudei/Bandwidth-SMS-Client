@@ -9,7 +9,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mah:DialogParticipation.Register="{Binding}"
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
-             mc:Ignorable="d" Height="445" Width="995">
+             mc:Ignorable="d">
     <DockPanel Margin="8" prism:RegionManager.RegionContext="{Binding Messages}">
         <Grid>
             <Grid.RowDefinitions>
@@ -17,7 +17,8 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Button Command="{Binding NewMessageCommand}" Content="Compose New" Margin="4,4,4,4"/>
+            <Button Command="{Binding NewMessageCommand}" 
+                    Content="Compose New" Margin="4,4,4,4"/>
             <ListView SelectedItem="{Binding SelectedConversation, Mode=TwoWay}"
                       ItemsSource="{Binding Conversations}" 
                       Grid.Row="1"
@@ -37,18 +38,51 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="10*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Text="{Binding Message}" MinLines="4" Margin="8"/>
+            <StackPanel Orientation="Vertical" Margin="8" Grid.RowSpan="2">
+                <TextBox Text="{Binding Message, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinLines="4" />
+                <TextBlock Text="{Binding Attachment}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
+            </StackPanel>
 
             <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
-                <Button Command="{Binding SendCommand}" Margin="8,2,8,2" Width="85">Send</Button>
-                <Button Command="{Binding AddMediaCommand}" Margin="8,2,8,2" Width="85">Add Media</Button>
-                <Button Command="{Binding RemoveMediaCommand}" Width="85" Content="Remove Media"/>
+                <Button Command="{Binding SendCommand}" Margin="8,2,8,2" Width="160">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <ico:FontAwesome 
+                                         Kind="MailBulkSolid"/>
+                        <TextBlock Grid.Column="1" Margin="5,0,0,0">Send</TextBlock>
+                    </Grid>
+
+                </Button>
+                <Button Command="{Binding AddMediaCommand}" Margin="8,2,8,2" Width="160">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <ico:FontAwesome 
+                            Kind="PlusSolid"/>
+                        <TextBlock Grid.Column="1" Margin="5,0,0,0">Add Media</TextBlock>
+                    </Grid>
+                </Button>
+                <Button Command="{Binding RemoveMediaCommand}" Width="160">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <ico:FontAwesome 
+                            Kind="MinusCircleSolid"/>
+                        <TextBlock Grid.Column="1" Margin="5,0,0,0">Remove Media</TextBlock>
+                    </Grid>
+                </Button>
             </StackPanel>
-            <TextBlock Text="{Binding Attachment}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
         </Grid>
         <GroupBox Header="Messages" DockPanel.Dock="Right" Margin="8">
             <ScrollViewer >
