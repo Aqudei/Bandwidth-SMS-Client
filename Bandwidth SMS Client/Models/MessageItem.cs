@@ -19,6 +19,7 @@ namespace Bandwidth_SMS_Client.Models
         public string MessageBWID { get; set; }
         public string GroupingPhone => MessageType == "OUTGOING" ? To : From;
 
+        public List<Media> Medias { get; set; } = new List<Media>();
 
 
         public string DisplayName

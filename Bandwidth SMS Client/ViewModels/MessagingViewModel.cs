@@ -43,8 +43,7 @@ namespace Bandwidth_SMS_Client.ViewModels
         private Conversation _selectedConversation;
         private Message _selectedMessage;
         private DelegateCommand _sendCommand;
-
-
+        private DelegateCommand _downloadOpenCommand;
 
         public MessagingViewModel(IRegionManager regionManager, IDialogService dialogService,
             SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper, IDialogCoordinator dialogCoordinator)
@@ -83,6 +82,13 @@ namespace Bandwidth_SMS_Client.ViewModels
         }
 
         public ICollectionView Conversations => CollectionViewSource.GetDefaultView(_conversations);
+
+        public DelegateCommand DownloadOpenCommand => _downloadOpenCommand ??= new DelegateCommand(DoDownloadOpen);
+
+        private void DoDownloadOpen()
+        {
+           
+        }
 
         public Conversation SelectedConversation
         {

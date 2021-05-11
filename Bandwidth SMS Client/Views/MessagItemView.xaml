@@ -5,18 +5,50 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Bandwidth_SMS_Client.Views"
              xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             xmlns:converters="clr-namespace:Bandwidth_SMS_Client.Converters" x:Class="Bandwidth_SMS_Client.Views.MessagItemView"
+             xmlns:converters="clr-namespace:Bandwidth_SMS_Client.Converters" x:Name="userControl" x:Class="Bandwidth_SMS_Client.Views.MessagItemView"
              mc:Ignorable="d">
 
     <UserControl.Resources>
         <converters:MessageTypeToAlignmentConverter x:Key="MessageTypeToAlignmentConverter"/>
         <converters:MessageTypeToBrushConverter x:Key="MessageTypeToBrushConverter"/>
+
+        <Style x:Key="LinkButton" 
+               TargetType="Button"
+               BasedOn="{StaticResource ResourceKey={x:Type Button}}"
+        >
+
+            <Setter Property="Width" Value="Auto"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter Content="{TemplateBinding Content}" 
+                                          ContentTemplate="{TemplateBinding  ContentTemplate}"
+                                          VerticalAlignment="Center"
+                        >
+                            <ContentPresenter.Resources>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="TextDecorations" Value="Underline" />
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="Blue" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground" Value="Red" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="16" 
           Width="600" 
           HorizontalAlignment="{Binding MessageType, Converter={StaticResource MessageTypeToAlignmentConverter}}">
-       
+
         <Border Background="{Binding MessageType, Converter={StaticResource MessageTypeToBrushConverter}}"
             Padding="15"
             CornerRadius="30">
@@ -30,6 +62,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock FontSize="16" d:Text="From: +639213466856" VerticalAlignment="Center" HorizontalAlignment="Left">
@@ -64,6 +97,17 @@
                     Grid.Row="1" Grid.ColumnSpan="3" 
                     HorizontalAlignment="Left"
                     Margin="10,0,0,0"/>
+                <ItemsControl Grid.Row="2"
+
+                              ItemsSource="{Binding Medias}"
+                              Grid.ColumnSpan="3" Grid.Column="0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button  Style="{StaticResource LinkButton}" Content="{Binding File}"
+                                     Command="{Binding ElementName=MessagingControl, Mode=OneWay}"></Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Border>
         <Border BorderThickness="0.5,0,0.5,0.5" 
