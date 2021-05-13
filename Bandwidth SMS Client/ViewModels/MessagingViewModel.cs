@@ -93,7 +93,9 @@ namespace Bandwidth_SMS_Client.ViewModels
 
         private void DoDownloadOpen(string file)
         {
-            var fileName = Path.Combine(_mediaDirectory, Path.GetFileName(file));
+            var filenameOnly = Path.GetFileName(file);
+            var fileName = Path.Combine(_mediaDirectory, filenameOnly);
+
             if (File.Exists(fileName))
             {
                 var fileOpener = new Process
@@ -104,7 +106,7 @@ namespace Bandwidth_SMS_Client.ViewModels
                 return;
             }
 
-            var remoteUri = $"http://sms.tripbx.com:8080/{file}";
+            var remoteUri = $"http://sms.tripbx.com:8080/media/{filenameOnly}";
             // Create a new WebClient instance.
             using var myWebClient = new WebClient();
             myWebClient.DownloadFile(remoteUri, fileName);
