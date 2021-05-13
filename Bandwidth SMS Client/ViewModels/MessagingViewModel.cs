@@ -2,7 +2,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -43,7 +45,8 @@ namespace Bandwidth_SMS_Client.ViewModels
         private Conversation _selectedConversation;
         private Message _selectedMessage;
         private DelegateCommand _sendCommand;
-        private DelegateCommand _downloadOpenCommand;
+        private DelegateCommand<string> _downloadOpenCommand;
+        private readonly string _mediaDirectory;
 
         public MessagingViewModel(IRegionManager regionManager, IDialogService dialogService,
             SMSClient smsClient, IEventAggregator eventAggregator, IMapper mapper, IDialogCoordinator dialogCoordinator)
@@ -55,6 +58,9 @@ namespace Bandwidth_SMS_Client.ViewModels
             _mapper = mapper;
             _dialogCoordinator = dialogCoordinator;
             _dispatcher = Application.Current.Dispatcher;
+
+            _mediaDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Bandwidth SMS Media");
+            Directory.CreateDirectory(_mediaDirectory);
 
             try
             {
@@ -83,11 +89,25 @@ namespace Bandwidth_SMS_Client.ViewModels
 
         public ICollectionView Conversations => CollectionViewSource.GetDefaultView(_conversations);
 
-        public DelegateCommand DownloadOpenCommand => _downloadOpenCommand ??= new DelegateCommand(DoDownloadOpen);
+        public DelegateCommand<string> DownloadOpenCommand => _downloadOpenCommand ??= new DelegateCommand<string>(DoDownloadOpen);
 
-        private void DoDownloadOpen()
+        private void DoDownloadOpen(string file)
         {
-           
+            var fileName = Path.Combine(_mediaDirectory, Path.GetFileName(file));
+            if (File.Exists(fileName))
+            {
+                var fileOpener = new Process
+                {
+                    StartInfo = { FileName = "explorer", Arguments = "\"" + fileName + "\"" }
+                };
+                fileOpener.Start();
+                return;
+            }
+
+            var remoteUri = $"http://sms.tripbx.com:8080/{file}";
+            // Create a new WebClient instance.
+            using var myWebClient = new WebClient();
+            myWebClient.DownloadFile(remoteUri, fileName);
         }
 
         public Conversation SelectedConversation
@@ -130,7 +150,7 @@ namespace Bandwidth_SMS_Client.ViewModels
             .ObservesProperty(() => Attachment);
 
         public DelegateCommand RemoveMediaCommand => _removeMediaCommand ??= new DelegateCommand(() => Attachment = "", () => !string.IsNullOrWhiteSpace(Attachment))
-            .ObservesProperty(()=>Attachment);
+            .ObservesProperty(() => Attachment);
 
 
         public string Attachment

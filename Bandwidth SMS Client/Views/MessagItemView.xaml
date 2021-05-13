@@ -103,8 +103,8 @@
                               Grid.ColumnSpan="3" Grid.Column="0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button  Style="{StaticResource LinkButton}" Content="{Binding File}"
-                                     Command="{Binding ElementName=MessagingControl, Mode=OneWay}"></Button>
+                            <Button  Style="{StaticResource LinkButton}" Content="{Binding File}" CommandParameter="{Binding File}"
+                                     Command="{Binding DataContext.DownloadOpenCommand, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=2, AncestorType={x:Type ItemsControl}}}"></Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
