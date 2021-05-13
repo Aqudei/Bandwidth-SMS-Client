@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="Bandwidth SMS Client.exe" version="1.0.0.18" publicKeyToken="3aa77f25fee6c8e8" language="neutral" processorArchitecture="msil" type="win32" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="Launcher" version="5.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="Launcher.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Launcher.exe" size="15320">
+      <assemblyIdentity name="Launcher" version="5.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>V/i4KvIiBYxos74bskTFU07+zITReV1V8tGjN6FplaU=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="Bandwidth SMS Client.exe" size="62390680">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>rqmXuppXrO5mEJ7qU2zPdg2OEUp8jilgFLgSA+5n5Bk=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=LAPTOP-BO2L7IPR\user" issuerKeyHash="1de9a5d60ac97e24de5c736717ca11557fde1d9b" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>vQ7UqNkijvl547fCJ2y/6GyU5cbAAQ8DUXmWB0rcnVE=</DigestValue></Reference></SignedInfo><SignatureValue>R3uh44cp6ZfKvLLLdYeIf/aYfuGM1LDcVY3VBIH1b29wMU9or/5X4u+Ee5YRBWm/swmhNYWbMcRoJZ7gaL9ARkqZDrahGjLHS+8Y+7X1hEbKeF0+mIq6H8fFqzpe15PbUtiCtw49DfvQLuRQ8N5RlAE9cEzbJj+11VO94uOr5Uw=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>1AWAhVGcpNzUf5+AHFZZyA/Au7jEyIFx2j3eL1PMyEbVfmI55mszu2vtR8FBHWoMDQVyu+aoNq/HZ8nJ3cyTbxgowvt9IrSsfRLegNt/4Y8+mkkVBMmtBYVwyaXGBJXwnWhyz+t0TSwa/d0aNqaktkPlqjKBCqWiC3tmDUXfd0E=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="519ddc4a07967951030f01c0c6e5946ce8bf6c27c2b7e379f98e22d9a8d40ebd" Description="" Url=""><as:assemblyIdentity name="Bandwidth SMS Client.exe" version="1.0.0.18" publicKeyToken="3aa77f25fee6c8e8" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=LAPTOP-BO2L7IPR\user</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>6MoD5gsYRr/x7sz1ssrFSrC+fvuwIdzXGORrkj0fqls=</DigestValue></Reference></SignedInfo><SignatureValue>eO+N7nVrWplFtVBmUiZPAfQ3JMQhqwlQ9COcKlcFBQxXWMXXGzmPvGg1zJMLG50ROZ5+R5zlgi7yWILivnkc+W61s+1N2s/yzbmF3F3KRQqGvsLRiEi0tGmSor/s9VBeN3dJkOhZmQ6t2n2dEM/pWdgXCyMy9nZIknbepRDVrlw=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>1AWAhVGcpNzUf5+AHFZZyA/Au7jEyIFx2j3eL1PMyEbVfmI55mszu2vtR8FBHWoMDQVyu+aoNq/HZ8nJ3cyTbxgowvt9IrSsfRLegNt/4Y8+mkkVBMmtBYVwyaXGBJXwnWhyz+t0TSwa/d0aNqaktkPlqjKBCqWiC3tmDUXfd0E=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB6TCCAVKgAwIBAgIQF1gFmuXjxoRJqjfUB1M/LDANBgkqhkiG9w0BAQsFADAzMTEwLwYDVQQDHigATABBAFAAVABPAFAALQBCAE8AMgBMADcASQBQAFIAXAB1AHMAZQByMB4XDTIxMDQwNjAwNDI1NVoXDTIyMDQwNjA2NDI1NVowMzExMC8GA1UEAx4oAEwAQQBQAFQATwBQAC0AQgBPADIATAA3AEkAUABSAFwAdQBzAGUAcjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA1AWAhVGcpNzUf5+AHFZZyA/Au7jEyIFx2j3eL1PMyEbVfmI55mszu2vtR8FBHWoMDQVyu+aoNq/HZ8nJ3cyTbxgowvt9IrSsfRLegNt/4Y8+mkkVBMmtBYVwyaXGBJXwnWhyz+t0TSwa/d0aNqaktkPlqjKBCqWiC3tmDUXfd0ECAwEAATANBgkqhkiG9w0BAQsFAAOBgQBPyd9H6U15YotgXd4mbodEd4R2TI5eHtrzRS2VSC+j0dN8YsCUqqXgQWWgviOb89rnut0PKYUXLBoYyY4XOWnKHD40HhstvyZO3rz9kmldt5tkeCao7j4dmZy7C6NtQ7BZePCX4BjqXoiVAKMWoWir/VFMAeszFRoW3ybrIuSZ0w==</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>
