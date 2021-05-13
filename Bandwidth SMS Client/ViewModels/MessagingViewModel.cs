@@ -261,7 +261,16 @@ namespace Bandwidth_SMS_Client.ViewModels
 
                         if (conversation != null && SelectedConversation != null &&
                             SelectedConversation.Equals(conversation))
-                            _dispatcher.Invoke(() => Messages.Add(e.MessageItem));
+                            _dispatcher.Invoke(() =>
+                            {
+                                var existingMessage = Messages.FirstOrDefault(item => item.Id == e.MessageItem.Id);
+                                if (existingMessage != null)
+                                {
+                                    Messages.Remove(existingMessage);
+                                }
+
+                                Messages.Add(e.MessageItem);
+                            });
                     }
                     break;
                 case MessageEventPayload.MessageEventType.Deleted:
